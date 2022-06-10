@@ -56,12 +56,7 @@ public class CapstoneV12 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws SQLException {
-        //            String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-//            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-//            ds.setURL(connectionString);
-//            connect = ds.getConnection("emp", "emp"); // connect to oracle database
-
-        GridPane pane = new GridPane();
+ GridPane pane = new GridPane();
         pane.setAlignment(Pos.CENTER);
         pane.setPadding(new Insets(11.5, 12.5, 13.5, 14.5));
         pane.setHgap(5.5);
@@ -88,6 +83,30 @@ public class CapstoneV12 extends Application {
         primaryStage.setTitle("Welcome"); //set stage title
         primaryStage.setScene(scene); //place scene on stage
         primaryStage.show();//display the stage
+    }
+
+    public void openLoginWindow() throws SQLException {
+        Stage loginWindow = new Stage();
+        GridPane pane = new GridPane();
+        loginWindow.setTitle("Login Window"); //set stage title
+
+        Scene scene2 = new Scene(pane, 500, 550);
+        pane.setAlignment(Pos.CENTER);
+        pane.add(txtUser, 1, 0);
+        pane.add(lblUser, 0, 0);
+        pane.add(txtPass, 1, 1);
+        pane.add(lblPass, 0, 1);
+        pane.add(btnLogin, 1, 2);
+
+        btnLogin.setOnAction(e -> {
+            try {
+                openHomescreen();
+            } catch (SQLException ex) {
+            }
+        });
+        loginWindow.setScene(scene2); //place scene on stage
+        loginWindow.show();//display the stage
+
     }
 
     public void openLoginWindow() throws SQLException {
