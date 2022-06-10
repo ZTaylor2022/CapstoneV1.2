@@ -109,30 +109,6 @@ public class CapstoneV12 extends Application {
 
     }
 
-    public void openLoginWindow() throws SQLException {
-        Stage loginWindow = new Stage();
-        GridPane pane = new GridPane();
-        loginWindow.setTitle("Login Window"); //set stage title
-
-        Scene scene2 = new Scene(pane, 500, 550);
-        pane.setAlignment(Pos.CENTER);
-        pane.add(txtUser, 1, 0);
-        pane.add(lblUser, 0, 0);
-        pane.add(txtPass, 1, 1);
-        pane.add(lblPass, 0, 1);
-        pane.add(btnLogin, 1, 2);
-
-        btnLogin.setOnAction(e -> {
-            try {
-                openHomescreen();
-            } catch (SQLException ex) {
-            }
-        });
-        loginWindow.setScene(scene2); //place scene on stage
-        loginWindow.show();//display the stage
-
-    }
-
     public void openAppWindow() throws SQLException {
         Stage applicationWindow = new Stage();
         GridPane pane = new GridPane();
