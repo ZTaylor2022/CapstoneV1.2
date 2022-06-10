@@ -32,7 +32,41 @@ import oracle.jdbc.pool.OracleDataSource;
  * @author black
  */
 public class CapstoneV12 extends Application {
+    static Connection connect;
+    Statement commStmt;
+    ResultSet rs;
 
+// textfields for volunteer application
+    TextField txtFirstName = new TextField();
+    TextField txtLastName = new TextField();
+    //TextField txtDOB = new TextField();
+    TextField txtPhoneNumber = new TextField();
+    TextField txtEmail = new TextField();
+    TextField txtAddress = new TextField();
+    Label lblFirstName = new Label("First Name");
+    Label lblLastName = new Label("Last Name");
+    Label lblDOB = new Label("DOB");
+    Label lblPhoneNumber = new Label("Phone Number");
+    Label lblEmail = new Label("Email");
+    Label lblAddress = new Label("Address");
+    Label lblExperience = new Label("Experience");
+    ComboBox<String> expCombo = new ComboBox<>();
+    Button btnSubmit = new Button("Submit Application");
+    DatePicker dob = new DatePicker();
+
+    //login window textfields and labels
+    TextField txtUser = new TextField();
+    TextField txtPass = new TextField();
+    Label lblUser = new Label("User");
+    Label lblPass = new Label("Password");
+    Button btnLogin = new Button("Login");
+
+    Button create = new Button("Welcome");
+    ///testing one more time
+    /// i will just keep trying to do this until we get it working
+    
+    /// wtdf
+   
     
     @Override
     public void start(Stage primaryStage) {
