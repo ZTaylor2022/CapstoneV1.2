@@ -5,34 +5,24 @@
  */
 package capstonev1.pkg2;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.format.DateTimeFormatter;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.*;
 import javafx.event.ActionEvent;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import oracle.jdbc.pool.OracleDataSource;
 
 /**
  *
  * @author black
  */
 public class CapstoneV12 extends Application {
-    static Connection connect;
+
+        static Connection connect;
     Statement commStmt;
     ResultSet rs;
 
@@ -62,54 +52,44 @@ public class CapstoneV12 extends Application {
     Button btnLogin = new Button("Login");
 
     Button create = new Button("Welcome");
-    ///testing one more time
-    /// i will just keep trying to do this until we get it working
-    
-    /// wtdf
-   
-    
+    ObservableList<App> applications = FXCollections.observableArrayList();
+
     @Override
-    public void start(Stage primaryStage) {
-        try {
-            String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-            ds.setURL(connectionString);
-            connect = ds.getConnection("emp", "emp"); // connect to oracle database
+    public void start(Stage primaryStage) throws SQLException {
+        //            String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+//            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+//            ds.setURL(connectionString);
+//            connect = ds.getConnection("emp", "emp"); // connect to oracle database
 
-            GridPane pane = new GridPane();
-            pane.setAlignment(Pos.CENTER);
-            pane.setPadding(new Insets(11.5, 12.5, 13.5, 14.5));
-            pane.setHgap(5.5);
-            pane.setVgap(5.5);
-
-            Button btLogin = new Button("Login");
-            pane.add(btLogin, 1, 3);
-            GridPane.setHalignment(btLogin, HPos.CENTER);
-            btLogin.setOnAction((ActionEvent e) -> {
-                try {
-                    openLoginWindow();
-                } catch (SQLException ex) {
-                }
-            });
-            Button btCreateApp = new Button("Submit New Application");
-            pane.add(btCreateApp, 1, 4);
-            GridPane.setHalignment(btCreateApp, HPos.CENTER);
-            btCreateApp.setOnAction(e -> {
-                try {
-                    openAppWindow();
-                } catch (SQLException ex) {
-                }
+        GridPane pane = new GridPane();
+        pane.setAlignment(Pos.CENTER);
+        pane.setPadding(new Insets(11.5, 12.5, 13.5, 14.5));
+        pane.setHgap(5.5);
+        pane.setVgap(5.5);
+        Button btLogin = new Button("Login");
+        pane.add(btLogin, 1, 3);
+        GridPane.setHalignment(btLogin, HPos.CENTER);
+        btLogin.setOnAction((ActionEvent e) -> {
+            try {
+                openLoginWindow();
+            } catch (SQLException ex) {
             }
-            );
-            Scene scene = new Scene(pane, 500, 600); //Create a scene
-            primaryStage.setTitle("Welcome"); //set stage title
-            primaryStage.setScene(scene); //place scene on stage
-            primaryStage.show();//display the stage
-
-        } catch (SQLException ex) {
-            System.out.println("Error" + ex);
-        }
+        });
+        Button btCreateApp = new Button("Submit New Application");
+        pane.add(btCreateApp, 1, 4);
+        GridPane.setHalignment(btCreateApp, HPos.CENTER);
+        btCreateApp.setOnAction((ActionEvent e) -> {
+            try {
+                openAppWindow();
+            } catch (SQLException ex) {
+            }
+        });
+        Scene scene = new Scene(pane, 500, 600); //Create a scene
+        primaryStage.setTitle("Welcome"); //set stage title
+        primaryStage.setScene(scene); //place scene on stage
+        primaryStage.show();//display the stage
     }
+
     public void openLoginWindow() throws SQLException {
         Stage loginWindow = new Stage();
         GridPane pane = new GridPane();
@@ -133,6 +113,7 @@ public class CapstoneV12 extends Application {
         loginWindow.show();//display the stage
 
     }
+
     public void openAppWindow() throws SQLException {
         Stage applicationWindow = new Stage();
         GridPane pane = new GridPane();
@@ -140,6 +121,7 @@ public class CapstoneV12 extends Application {
         applicationWindow.setTitle("Volunteer Applications"); //set stage title
         ObservableList<String> experienceList = FXCollections.observableArrayList("Novice", "Intermediate", "Expert");
         Scene scene3 = new Scene(pane, 500, 550);
+
         pane.setAlignment(Pos.CENTER);
         pane.add(lblFirstName, 0, 0);
         pane.add(lblLastName, 0, 1);
@@ -160,6 +142,36 @@ public class CapstoneV12 extends Application {
         pane.add(btnSubmit, 1, 7);
 
         btnSubmit.setOnAction(e -> {
+            String query = "Select * from application";
+            DBConnection conn = new DBConnection();
+            try {
+                conn.sendDBCommand(query);
+                while (conn.dbResults.next()) {
+                    int appID = rs.getInt(1);
+                    String fname = rs.getString(2);
+                    String lname = rs.getString(3);
+                    String dob2 = rs.getString(4);
+                    String email = rs.getString(5);
+                    String phone = rs.getString(6);
+                    String address = rs.getString(7);
+                    String exp = rs.getString(8);
+
+                    App dbApp = new App();
+                    dbApp.setAppID(appID);
+                    dbApp.setAFirst(fname);
+                    dbApp.setALast(lname);
+                    dbApp.setDOB(dob2);
+                    dbApp.setEmail(email);
+                    dbApp.setPhone(phone);
+                    dbApp.setAddress(address);
+                    dbApp.setExperience(exp);
+                    applications.add(dbApp);
+                }
+
+                conn.dbResults.close();
+            } catch (SQLException ex) {
+
+            }
             //give error if any fields are empty
             if (txtFirstName.getText().isEmpty() || txtLastName.getText().isEmpty() || dob.getValue() == null
                     || //DOB.getChronology().isNull ||
@@ -171,22 +183,23 @@ public class CapstoneV12 extends Application {
             } else {
                 System.out.println(txtFirstName.getText() + " " + txtLastName.getText() + " " + dob.getValue() + " " + txtPhoneNumber.getText() + " "
                         + txtEmail.getText() + " " + txtAddress.getText() + " " + expCombo.getValue());
-                
+
                 //code for creating a new application when submit button is clicked
-//        Application submittedApp = new Application(
-//                txtFirstName.getText(),
-//                txtLastName.getText(),
-//                txtDOB.getText(),
-//                txtPhoneNumber.getText(),
-//                txtEmail.getText(),
-//                txtAddress.getText(),
-//                expCombo.getValue()
+                App submittedApp = new App(
+                        txtFirstName.getText(),
+                        txtLastName.getText(),
+                        dob.getValue().format(DateTimeFormatter.ISO_DATE),
+                        txtPhoneNumber.getText(),
+                        txtEmail.getText(),
+                        txtAddress.getText(),
+                        expCombo.getValue());
 //        ); applications.add(submittedApp);
-//        String query = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,email,phone, address,experience,status) VALUES (" + submittedApp.getAppID() + ", '"
-//                + txtFirstName.getText() + "', '" + txtLastName.getText() + "', '" + dob.getValue() + "', '" + txtEmail.getText() + "', '" + txtAddress.getText() + 
-//                "', '" + expCombo.getValue() + "', '" + submittedApp.getStatus() + "','" + "')";
-//        DBConnection conn = new DBConnection();
-//        conn.sendDBCommand(query);
+                System.out.println(submittedApp.appID);
+                String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,email,phone,address,experience) VALUES (" + submittedApp.appID + ", '"
+                        + txtFirstName.getText() + "', '" + txtLastName.getText() + "', TO_DATE('" + dob.getValue() + "','yyyy-mm-dd'), '" + txtEmail.getText() + "', '"
+                        + txtPhoneNumber.getText() + "', '" + txtAddress.getText() + "', '" + expCombo.getValue() + "')";
+//                 DBConnection conn = new DBConnection();
+                conn.sendDBCommand(insert);
 
                 //clear text fields after submission
                 txtFirstName.setText("");
@@ -205,8 +218,10 @@ public class CapstoneV12 extends Application {
         });
         applicationWindow.setScene(scene3); //place scene on stage
         applicationWindow.show();//display the stage
+
     }
-private void openHomescreen() throws SQLException {
+
+    private void openHomescreen() throws SQLException {
         //homescreen for volunteer after logging in
         Stage homescreenWindow = new Stage();
         GridPane pane = new GridPane();
@@ -252,5 +267,5 @@ private void openHomescreen() throws SQLException {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }

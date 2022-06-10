@@ -3,43 +3,44 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package capstonev1.pkg2.Classes;
+package capstonev1.pkg2;
 
 /**
  *
  * @author Vanessa Quinteros
  */
-public class Application {
-    public int appID;
-    public String aFirst,aLast,dob,email,phone,address,experience;
-    protected final static int MAXAPPS = 500;
-    public static Application [] apps = new Application[MAXAPPS];
+public class App {
+    //Data fields
+    public int appID =1;
+    public String aFirst,aLast,dob,email, phone, address, experience;
+    static public int appCount = 1;
     
-    public Application(){
+    public App(){
         this.appID = 0;
-        this.aFirst = null;
+        this.aFirst =null;
         this.aLast = null;
         this.dob = null;
         this.email = null;
         this.phone = null;
         this.address = null;
         this.experience = null;
+        appCount++;
     }
-        public Application(int appID,String aFirst,String aLast,String dob,String email,String phone,String address,String exp){
-        this.appID = appID;
+    public App(String aFirst,String aLast,String dob,String email, 
+        String phone, String address, String experience){
+        this.appID = appCount;
         this.aFirst = aFirst;
         this.aLast = aLast;
         this.dob = dob;
         this.email = email;
         this.phone = phone;
         this.address = address;
-        this.experience = exp;
+        this.experience = experience;
+        appCount++;
     }
-            //GETTERS
     public int getAppID(){
-        return appID;
+        return this.appID;
     }
-    
     public String getAFirst(){
         return aFirst;
     }
@@ -49,17 +50,17 @@ public class Application {
     public String getDOB(){
         return dob;
     }
-    public String getExperience(){
-        return experience;
+    public String getEmail(){
+        return email;
     }
     public String getPhone(){
         return phone;
     }
-    public String getEmail(){
-        return email;
-    }
     public String getAddress(){
         return address;
+    }
+    public String getExperience(){
+        return experience;
     }
     
     //SETTERS
@@ -75,16 +76,16 @@ public class Application {
     public void setDOB(String birthDate){
         this.dob = birthDate;
     }
+    public void setEmail(String email){
+        this.email = email;
+    }
+    public void setPhone(String phone){
+        this.phone = phone;
+    }
+    public void setAddress(String address){
+        this.phone = address;
+    }
     public void setExperience(String exp){
         this.experience = exp;
-    }
-    public void setPhone(String stat){
-        this.phone = stat;
-    }
-    public void setEmail(String spec){
-        this.email = spec;
-    }
-    public void setAddress(String vID){
-        this.address = vID;
     }
 }

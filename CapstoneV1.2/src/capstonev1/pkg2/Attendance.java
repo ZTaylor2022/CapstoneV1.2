@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package capstonev1.pkg2.Classes;
+package capstonev1.pkg2;
 
 /**
  *
@@ -34,4 +34,5 @@ public class Attendance {
     public void setVolunteerID(int v){
         this.volunteerID = v;
     }
+    
 }
