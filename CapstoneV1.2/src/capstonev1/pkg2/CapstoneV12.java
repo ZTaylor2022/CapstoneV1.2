@@ -74,7 +74,7 @@ public class CapstoneV12 extends Application {
             String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
             OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
             ds.setURL(connectionString);
-            connect = ds.getConnection("emp", "emp"); // connect to oracle database
+            connect = ds.getConnection("javauser", "javapass"); // connect to oracle database
 
             GridPane pane = new GridPane();
             pane.setAlignment(Pos.CENTER);
