@@ -56,6 +56,7 @@ public class capstoneRedo2 extends Application {
 
     Button backButton = new Button("Home Screen");
     ToolBar toolBar = new ToolBar();
+    Button applicationBackButton = new Button("Back");
 
     String fontStyle = "garamond";
 
@@ -84,13 +85,14 @@ public class capstoneRedo2 extends Application {
 
         centerPane.setHgap(10.0);
 
-        Scene scene = new Scene(pane, 350, 500); //Create a scene
+        Scene scene = new Scene(pane, 400, 500); //Create a scene
         primaryStage.setTitle("Bark"); //set stage title
         primaryStage.setScene(scene); //place scene on stage
         primaryStage.show();//display the stage
     }
 
-    public Text subHeading(Text text) {
+    public Text subHeading(String string) {
+        Text text = new Text(string);
         text.setFont(Font.font(fontStyle, FontWeight.BOLD, 15));
         //text.setStroke(Color.DARKSLATEGRAY);
         //text.setStrokeWidth(1);
@@ -128,6 +130,9 @@ public class capstoneRedo2 extends Application {
     }
 
     public void welcomeModule() {
+        
+        pane.getChildren().remove(applicationBackButton);
+        refreshCenterPane(centerPane);
 
         TextField userNameTF = new TextField();
         TextField passwordTF = new TextField();
@@ -138,18 +143,16 @@ public class capstoneRedo2 extends Application {
         appButton.setStyle(buttonStyle);
 
         loginButton.setOnAction(e -> homeScreen());
+        appButton.setOnAction(e -> applicationScreen());
 
-        centerPane.add(subHeading(new Text("VOLUNTEER LOG IN")), 0, 0);
+        centerPane.add(subHeading("VOLUNTEER LOG IN"), 0, 0);
         centerPane.add(labelText("User Name"), 0, 1);
         centerPane.add(labelText("Password"), 0, 2);
         centerPane.add(userNameTF, 1, 1);
         centerPane.add(passwordTF, 1, 2);
         centerPane.add(loginButton, 1, 3);
 
-        Text newVol = new Text();
-        newVol.setText("\n\n\nNEW VOLUNTEERS");
-
-        centerPane.add(subHeading(newVol), 0, 10);
+        centerPane.add(subHeading("\n\n\nNEW VOLUNTEERS"), 0, 10);
         centerPane.add(appButton, 0, 11);
 
         GridPane.setMargin(loginButton, new Insets(5));
@@ -162,6 +165,45 @@ public class capstoneRedo2 extends Application {
         gP.getChildren().clear();
     }
 
+    public void applicationScreen() {
+        refreshCenterPane(centerPane);
+        
+        pane.setTop(heading("Volunteer Application"));
+        
+        TextField applicationFirstName = new TextField();
+        TextField applicationLastName = new TextField();
+        TextField applicationDOB = new TextField();
+        TextField applicationExperience = new TextField();
+        TextField applicationStatus = new TextField();
+        TextField applicationSpecialization = new TextField();
+        
+        Button applicationSubmit = new Button("Submit Application");
+        applicationSubmit.setStyle(buttonStyle);
+        
+        applicationBackButton.setStyle(buttonStyle);
+        applicationBackButton.setOnAction(e -> welcomeModule());
+        
+        centerPane.add(subHeading("Complete all Fields"), 0, 0);
+        centerPane.add(labelText("First Name:"), 0, 1);
+        centerPane.add(labelText("Last Name:"), 0, 2);
+        centerPane.add(labelText("Birth Date:"), 0, 3);
+        centerPane.add(labelText("Experience:"), 0, 4);
+        centerPane.add(labelText("Status:"), 0, 5);
+        centerPane.add(labelText("Specialization:"), 0, 6);
+        
+        centerPane.add(applicationFirstName, 1, 1);
+        centerPane.add(applicationLastName, 1, 2);
+        centerPane.add(applicationDOB, 1, 3);
+        centerPane.add(applicationExperience, 1, 4);
+        centerPane.add(applicationStatus, 1, 5);
+        centerPane.add(applicationSpecialization, 1, 6);
+        centerPane.add(applicationSubmit, 1, 10);
+        
+        pane.setBottom(applicationBackButton);
+        
+        pane.setCenter(centerPane);
+        
+    }
     public void homeScreen() {
         pane.setTop(heading("Volunteer Home Screen"));
 
@@ -181,7 +223,7 @@ public class capstoneRedo2 extends Application {
 
         refreshCenterPane(centerPane);
 
-        centerPane.add(subHeading(new Text("Please Choose From Menu")), 0, 0);
+        centerPane.add(subHeading("Please Choose From Menu"), 0, 0);
         centerPane.add(volunteerCheckInButton, 0, 1);
         centerPane.add(volunteerCheckOutButton, 0, 2);
         centerPane.add(reportsButton, 0, 3);
@@ -193,12 +235,36 @@ public class capstoneRedo2 extends Application {
         volunteerCheckOutButton.setOnAction(e -> volunteerCheckIO("Out"));
         logEventButton.setOnAction(e -> logEvent());
         reportsButton.setOnAction(e -> reports());
+        assignSpecButton.setOnAction(e -> assignSpec());
 
         centerPane.setVgap(8);
         pane.setCenter(centerPane);
 
     }
 
+    public void assignSpec() {
+        refreshCenterPane(centerPane);
+        
+        Button assignSpecButton = new Button("Submit Specialization");
+        assignSpecButton.setStyle(buttonStyle);
+        
+        pane.setTop(heading("Assign a Specialization"));
+        
+        centerPane.add(subHeading("Make Selection"),0,0);
+        centerPane.add(labelText("Employee:"),0, 1);
+        centerPane.add(labelText("Specialization:"),0, 2);
+        
+       centerPane.add((new ComboBox<Object>()), 1, 1);
+       centerPane.add((new ComboBox<Object>()), 1, 2);
+       
+       centerPane.add(assignSpecButton, 1, 3);
+       
+       addBackButton();
+       
+       pane.setCenter(centerPane);
+       
+       
+    }
     public void volunteerCheckIO(String type) {
         refreshCenterPane(centerPane);
 
@@ -257,3 +323,4 @@ public class capstoneRedo2 extends Application {
     }
 
 }
+
