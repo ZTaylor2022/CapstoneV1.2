@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package capstonev1.pkg2.Classes;
+package capstonev1.pkg2;
 
 /**
  *
  * @author Vanessa Quinteros
  */
 public class Event {
-    public int eventID;
+       public int eventID;
     public String location,mileage,task;
     public int volunteerID, maxVolunteers;
     public final static int MAXEVENTS = 500;
@@ -72,4 +72,5 @@ public class Event {
     public void setVolunteerID(int vID){
         this.volunteerID = vID;
     }
+    
 }
