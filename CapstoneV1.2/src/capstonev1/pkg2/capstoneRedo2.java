@@ -250,6 +250,8 @@ public class capstoneRedo2 extends Application {
                             + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
                             + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
                     conn.sendDBCommand(insert);
+                    String commit = "commit";
+                    conn.sendDBCommand(commit);
 
                     //clear text fields after submission
                     applicationFirstName.setText("");
