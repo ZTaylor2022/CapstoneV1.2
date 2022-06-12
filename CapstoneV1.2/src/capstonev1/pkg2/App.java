@@ -11,12 +11,12 @@ package capstonev1.pkg2;
  */
 public class App {
     //Data fields
-    public int appID =1;
+    public int appID;
     public String aFirst,aLast,dob,email, phone, address, experience;
-    static public int appCount = 1;
+    static public int appCount = 200;
     
     public App(){
-        this.appID = 0;
+        this.appID = appCount;
         this.aFirst =null;
         this.aLast = null;
         this.dob = null;

@@ -56,7 +56,6 @@ public class CapstoneV12 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws SQLException {
- GridPane pane = new GridPane();
         pane.setAlignment(Pos.CENTER);
         pane.setPadding(new Insets(11.5, 12.5, 13.5, 14.5));
         pane.setHgap(5.5);
