@@ -359,11 +359,14 @@ public class capstoneRedo2 extends Application {
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("LOG EVENT"));
+        Button btnLogEvent = new Button("Submit Event!");
 
-        centerPane.add(labelText("Location"), 0, 0);
-        centerPane.add(labelText("Miles"), 0, 1);
+        centerPane.add(labelText("Location:"), 0, 0);
+        centerPane.add(labelText("Miles:"), 0, 1);
         centerPane.add((new ComboBox<Object>()), 1, 0);
         centerPane.add((new ComboBox<Object>()), 1, 1);
+        centerPane.add((btnLogEvent), 0, 2);
+        
 
         addBackButton();
     }
