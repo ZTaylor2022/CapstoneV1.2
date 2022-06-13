@@ -9,10 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import static javafx.collections.FXCollections.observableArrayList;
 import javafx.collections.ObservableList;
@@ -369,14 +372,65 @@ public class capstoneRedo2 extends Application {
     }
 
     public void logEvent() {
+        
+        ObservableList<String> location = FXCollections.observableArrayList(
+                "Charlottesville",
+                "Luray",
+                "Lynchburg",
+                "Richmond",
+                "Washington");
+        // try to populate based off db
+        // "select distinct location from events"
+        // maybe add a "New Locations" button
+        final ObservableList<String> cvilleMiles = FXCollections.observableArrayList(
+                "62");
+        final ObservableList<String> lurayMiles = FXCollections.observableArrayList(
+                "33");
+        final ObservableList<String> lynchburgMiles = FXCollections.observableArrayList(
+                "97");
+        final ObservableList<String> richmondMiles = FXCollections.observableArrayList(
+                "130");
+        final ObservableList<String> washMiles = FXCollections.observableArrayList(
+                "132");
+
+        ComboBox cboLocation = new ComboBox(location);
+        final ComboBox cboMiles = new ComboBox();
+        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ObservableValue ov, Object t, Object t1) {
+
+                switch (t1.toString()) {
+                    case "Charlottesville":
+                        cboMiles.setItems(cvilleMiles);
+                        break;
+                    case "Luray":
+                        cboMiles.setItems(lurayMiles);
+                        break;
+                    case "Lynchburg":
+                        cboMiles.setItems(lynchburgMiles);
+                        break;
+                    case "Richmond":
+                        cboMiles.setItems(richmondMiles);
+                        break;
+                    case "Washington":
+                        cboMiles.setItems(washMiles);
+                        break;
+                }
+
+            }        
+        });
+        
         refreshCenterPane(centerPane);
-
         pane.setTop(heading("LOG EVENT"));
+        Button btnLogEvent = new Button("Submit Event!");
 
-        centerPane.add(labelText("Location"), 0, 0);
-        centerPane.add(labelText("Miles"), 0, 1);
-        centerPane.add((new ComboBox<Object>()), 1, 0);
-        centerPane.add((new ComboBox<Object>()), 1, 1);
+        centerPane.add(labelText("Location:"), 0, 0);
+        centerPane.add(labelText("Miles:"), 0, 1);
+        centerPane.add(cboLocation, 1, 0);
+        centerPane.add(cboMiles, 1, 1);
+        centerPane.add((btnLogEvent), 0, 2);
+        btnLogEvent.setStyle(buttonStyle);
 
         addBackButton();
     }
