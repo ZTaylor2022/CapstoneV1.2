@@ -9,11 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
-<<<<<<< HEAD
+
 import java.util.Set;
-=======
+
 import java.util.ArrayList;
->>>>>>> Ziltz
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -367,16 +367,15 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
     }
-<<<<<<< HEAD
 
-    public void volunteerCheckIO(String type) {
-=======
+
+    //public void volunteerCheckIO(String type) {
+
     public void volunteerCheckIO(String type) throws SQLException {
->>>>>>> Ziltz
-        refreshCenterPane(centerPane);
+         refreshCenterPane(centerPane);
         
         ObservableList<String> Times = 
-        FXCollections.observableArrayList(
+        FXCollections.observableArrayList( 
             "9:00 A.M",
             "10:00 A.M",
             "11:00 A.M",
