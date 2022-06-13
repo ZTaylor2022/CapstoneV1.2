@@ -409,8 +409,6 @@ public class capstoneRedo2 extends Application {
         centerPane.add(txtMileage, 1, 1);
         centerPane.add(submitEvent, 0, 2);
         submitEvent.setStyle(buttonStyle);
-        
-       
 
         addBackButton();
     }
