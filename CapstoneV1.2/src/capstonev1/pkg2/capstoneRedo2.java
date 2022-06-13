@@ -416,7 +416,19 @@ public class capstoneRedo2 extends Application {
         addBackButton();
         
         addEvent.setOnAction((ActionEvent e) -> {
+            refreshCenterPane(centerPane);
+            TextField txtNewLoc = new TextField();
+            TextField txtNewMileage = new TextField();
             
+            centerPane.add(labelText("Location:"), 0, 0);
+            centerPane.add(txtNewLoc, 1, 0);
+            centerPane.add(labelText("Mileage"), 0, 1);
+            centerPane.add(labelText("Task"), 0, 2);
+            pane.setTop(heading("ADD NEW EVENT"));
+            addBackButton(); // can add previous button to get back to existing locations
+            
+
+      
         });
 
         submitEvent.setOnAction((ActionEvent e) -> {
