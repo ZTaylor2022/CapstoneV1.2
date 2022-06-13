@@ -12,7 +12,7 @@ package capstonev1.pkg2;
 public class App {
     //Data fields
     public int appID;
-    public String aFirst,aLast,dob,email, password, phone, address, experience;
+    public String aFirst,aLast,dob,email, phone, address, experience;
     static public int appCount = 200;
     public static App[] apps = new App[1000];
     
@@ -22,20 +22,18 @@ public class App {
         this.aLast = null;
         this.dob = null;
         this.email = null;
-        this.password = null;
         this.phone = null;
         this.address = null;
         this.experience = null;
         appCount++;
     }
-    public App(String aFirst,String aLast,String dob,String email,String pass,
+    public App(String aFirst,String aLast,String dob,String email,
         String phone, String address, String experience){
         this.appID = appCount;
         this.aFirst = aFirst;
         this.aLast = aLast;
         this.dob = dob;
         this.email = email;
-        this.password = pass;
         this.phone = phone;
         this.address = address;
         this.experience = experience;
@@ -56,9 +54,7 @@ public class App {
     public String getEmail(){
         return email;
     }
-    public String getPassword(){
-        return password;
-    }
+   
     public String getPhone(){
         return phone;
     }
@@ -85,9 +81,7 @@ public class App {
     public void setEmail(String email){
         this.email = email;
     }
-    public void setPassword(String p){
-        this.password = p;
-    }
+   
     public void setPhone(String phone){
         this.phone = phone;
     }
@@ -97,32 +91,5 @@ public class App {
     public void setExperience(String exp){
         this.experience = exp;
     }
-    public boolean isUserValid(String x){
-        boolean emailCheck = false;
-        int i = 0;
-        for(i=0;i<apps.length;i++){
-            if (apps[i].email != x){
-                i++;
-            }
-            else{
-                emailCheck = true;
-            }
-            
-        }
-        return emailCheck;
-    }
-    public boolean isPasswordValid(String y){
-        boolean passwordCheck = false;
-        int i = 0;
-        for(i=0;i<apps.length;i++){
-            if (apps[i].password != y){
-                i++;
-            }
-            else{
-                passwordCheck = true;
-            }
-            
-        }
-        return passwordCheck;
-    }
+    
 }
