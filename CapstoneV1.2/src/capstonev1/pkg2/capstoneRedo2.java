@@ -14,8 +14,10 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.collections.FXCollections;
+import static javafx.collections.FXCollections.observableArrayList;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventType;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import static javafx.geometry.Orientation.VERTICAL;
@@ -184,7 +186,7 @@ public class capstoneRedo2 extends Application {
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
         ObservableList<String> experienceList = FXCollections.observableArrayList("Novice", "Intermediate", "Expert");
-       
+
         Button applicationSubmit = new Button("Submit Application");
         applicationSubmit.setStyle(buttonStyle);
 
@@ -214,8 +216,8 @@ public class capstoneRedo2 extends Application {
             DBConnection conn = new DBConnection();
             String query = "Select * from application";
             try {
-            conn.sendDBCommand(query);
-            while (conn.dbResults.next()) { //get database data
+                conn.sendDBCommand(query);
+                while (conn.dbResults.next()) { //get database data
                     App dbApp = new App();
                     dbApp.setAppID(conn.dbResults.getInt(1));
                     dbApp.setAFirst(conn.dbResults.getString(2));
@@ -225,54 +227,53 @@ public class capstoneRedo2 extends Application {
                     dbApp.setEmail(conn.dbResults.getString(6));
                     dbApp.setAddress(conn.dbResults.getString(7));
                     dbApp.setExperience(conn.dbResults.getString(8));
-            } 
-               conn.dbResults.close();
+                }
+                conn.dbResults.close();
             } catch (SQLException ex) {
             }
-                //give error if any fields are empty
-                if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
-                        || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationAddress.getText().isEmpty()
-                        || applicationExperience.getValue().isEmpty()) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setHeaderText("Please enter all data");
-                    alert.showAndWait();
-                } else {
+            //give error if any fields are empty
+            if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
+                    || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationAddress.getText().isEmpty()
+                    || applicationExperience.getValue().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Please enter all data");
+                alert.showAndWait();
+            } else {
+                App submittedApp = new App( //create new application 
+                        applicationFirstName.getText(),
+                        applicationLastName.getText(),
+                        applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
+                        applicationPhone.getText(),
+                        applicationEmail.getText(),
+                        applicationAddress.getText(),
+                        applicationExperience.getValue());
+                String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,address,experience) VALUES (" + submittedApp.appID + ", '"
+                        + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
+                        + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
+                conn.sendDBCommand(insert);
+                String commit = "commit";
+                conn.sendDBCommand(commit);
 
-                    App submittedApp = new App(   //create new application 
-                            applicationFirstName.getText(),
-                            applicationLastName.getText(),
-                            applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
-                            applicationPhone.getText(),
-                            applicationEmail.getText(),
-                            applicationAddress.getText(),
-                            applicationExperience.getValue());
-                    String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,address,experience) VALUES (" + submittedApp.appID + ", '"
-                            + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
-                            + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
-                    conn.sendDBCommand(insert);
-                    String commit = "commit";
-                    conn.sendDBCommand(commit);
+                //clear text fields after submission
+                applicationFirstName.setText("");
+                applicationLastName.setText("");
+                applicationDOB.setValue(null);
+                applicationPhone.setText("");
+                applicationEmail.setText("");
+                applicationAddress.setText("");
+                applicationExperience.setValue("");
 
-                    //clear text fields after submission
-                    applicationFirstName.setText("");
-                    applicationLastName.setText("");
-                    applicationDOB.setValue(null);
-                    applicationPhone.setText("");
-                    applicationEmail.setText("");
-                    applicationAddress.setText("");
-                    applicationExperience.setValue("");
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Application Submitted!");
+                alert.showAndWait();
+            }
+        });
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Application Submitted!");
-                    alert.showAndWait();
-                }
-            });
+        pane.setBottom(applicationBackButton);
 
-            pane.setBottom(applicationBackButton);
+        pane.setCenter(centerPane);
 
-            pane.setCenter(centerPane);
-
-        }
+    }
 
     public void homeScreen() {
         pane.setTop(heading("Volunteer Home Screen"));
@@ -313,6 +314,7 @@ public class capstoneRedo2 extends Application {
     }
 
     public void assignSpec() {
+        DBConnection conn = new DBConnection();
         refreshCenterPane(centerPane);
 
         Button assignSpecButton = new Button("Submit Specialization");
@@ -321,12 +323,21 @@ public class capstoneRedo2 extends Application {
         pane.setTop(heading("Assign a Specialization"));
 
         centerPane.add(subHeading("Make Selection"), 0, 0);
-        centerPane.add(labelText("Employee:"), 0, 1);
+        centerPane.add(labelText("Volunteer:"), 0, 1);
         centerPane.add(labelText("Specialization:"), 0, 2);
-
-        centerPane.add((new ComboBox<Object>()), 1, 1);
-        centerPane.add((new ComboBox<Object>()), 1, 2);
-
+        ComboBox<String> specializations = new ComboBox<>();
+        ComboBox<Volunteer> volunteersList = new ComboBox<>();
+        try {
+            String query = "Select distinct specialization from volunteers";
+            conn.sendDBCommand(query);
+           while (conn.dbResults.next()) {
+                specializations.getItems().add(conn.dbResults.getString("specialization"));
+            }
+        } catch (SQLException ex) {
+        }
+        specializations.setEditable(true);
+        centerPane.add(volunteersList, 1, 1);
+        centerPane.add(specializations, 1, 2);
         centerPane.add(assignSpecButton, 1, 3);
 
         addBackButton();
