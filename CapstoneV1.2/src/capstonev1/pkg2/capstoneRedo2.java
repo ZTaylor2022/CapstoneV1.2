@@ -9,10 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -184,7 +187,7 @@ public class capstoneRedo2 extends Application {
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
         ObservableList<String> experienceList = FXCollections.observableArrayList("Novice", "Intermediate", "Expert");
-       
+
         Button applicationSubmit = new Button("Submit Application");
         applicationSubmit.setStyle(buttonStyle);
 
@@ -214,8 +217,8 @@ public class capstoneRedo2 extends Application {
             DBConnection conn = new DBConnection();
             String query = "Select * from application";
             try {
-            conn.sendDBCommand(query);
-            while (conn.dbResults.next()) { //get database data
+                conn.sendDBCommand(query);
+                while (conn.dbResults.next()) { //get database data
                     App dbApp = new App();
                     dbApp.setAppID(conn.dbResults.getInt(1));
                     dbApp.setAFirst(conn.dbResults.getString(2));
@@ -225,54 +228,54 @@ public class capstoneRedo2 extends Application {
                     dbApp.setEmail(conn.dbResults.getString(6));
                     dbApp.setAddress(conn.dbResults.getString(7));
                     dbApp.setExperience(conn.dbResults.getString(8));
-            } 
-               conn.dbResults.close();
+                }
+                conn.dbResults.close();
             } catch (SQLException ex) {
             }
-                //give error if any fields are empty
-                if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
-                        || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationAddress.getText().isEmpty()
-                        || applicationExperience.getValue().isEmpty()) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setHeaderText("Please enter all data");
-                    alert.showAndWait();
-                } else {
+            //give error if any fields are empty
+            if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
+                    || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationAddress.getText().isEmpty()
+                    || applicationExperience.getValue().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Please enter all data");
+                alert.showAndWait();
+            } else {
 
-                    App submittedApp = new App(   //create new application 
-                            applicationFirstName.getText(),
-                            applicationLastName.getText(),
-                            applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
-                            applicationPhone.getText(),
-                            applicationEmail.getText(),
-                            applicationAddress.getText(),
-                            applicationExperience.getValue());
-                    String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,address,experience) VALUES (" + submittedApp.appID + ", '"
-                            + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
-                            + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
-                    conn.sendDBCommand(insert);
-                    String commit = "commit";
-                    conn.sendDBCommand(commit);
+                App submittedApp = new App( //create new application 
+                        applicationFirstName.getText(),
+                        applicationLastName.getText(),
+                        applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
+                        applicationPhone.getText(),
+                        applicationEmail.getText(),
+                        applicationAddress.getText(),
+                        applicationExperience.getValue());
+                String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,address,experience) VALUES (" + submittedApp.appID + ", '"
+                        + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
+                        + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
+                conn.sendDBCommand(insert);
+                String commit = "commit";
+                conn.sendDBCommand(commit);
 
-                    //clear text fields after submission
-                    applicationFirstName.setText("");
-                    applicationLastName.setText("");
-                    applicationDOB.setValue(null);
-                    applicationPhone.setText("");
-                    applicationEmail.setText("");
-                    applicationAddress.setText("");
-                    applicationExperience.setValue("");
+                //clear text fields after submission
+                applicationFirstName.setText("");
+                applicationLastName.setText("");
+                applicationDOB.setValue(null);
+                applicationPhone.setText("");
+                applicationEmail.setText("");
+                applicationAddress.setText("");
+                applicationExperience.setValue("");
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Application Submitted!");
-                    alert.showAndWait();
-                }
-            });
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Application Submitted!");
+                alert.showAndWait();
+            }
+        });
 
-            pane.setBottom(applicationBackButton);
+        pane.setBottom(applicationBackButton);
 
-            pane.setCenter(centerPane);
+        pane.setCenter(centerPane);
 
-        }
+    }
 
     public void homeScreen() {
         pane.setTop(heading("Volunteer Home Screen"));
@@ -358,17 +361,65 @@ public class capstoneRedo2 extends Application {
     }
 
     public void logEvent() {
-        refreshCenterPane(centerPane);
+        
+        ObservableList<String> location = FXCollections.observableArrayList(
+                "Charlottesville",
+                "Luray",
+                "Lynchburg",
+                "Richmond",
+                "Washington");
+        // try to populate based off db
+        // "select distinct location from events"
+        // maybe add a "New Locations" button
+        final ObservableList<String> cvilleMiles = FXCollections.observableArrayList(
+                "62");
+        final ObservableList<String> lurayMiles = FXCollections.observableArrayList(
+                "33");
+        final ObservableList<String> lynchburgMiles = FXCollections.observableArrayList(
+                "97");
+        final ObservableList<String> richmondMiles = FXCollections.observableArrayList(
+                "130");
+        final ObservableList<String> washMiles = FXCollections.observableArrayList(
+                "132");
 
+        ComboBox cboLocation = new ComboBox(location);
+        final ComboBox cboMiles = new ComboBox();
+        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ObservableValue ov, Object t, Object t1) {
+
+                switch (t1.toString()) {
+                    case "Charlottesville":
+                        cboMiles.setItems(cvilleMiles);
+                        break;
+                    case "Luray":
+                        cboMiles.setItems(lurayMiles);
+                        break;
+                    case "Lynchburg":
+                        cboMiles.setItems(lynchburgMiles);
+                        break;
+                    case "Richmond":
+                        cboMiles.setItems(richmondMiles);
+                        break;
+                    case "Washington":
+                        cboMiles.setItems(washMiles);
+                        break;
+                }
+
+            }        
+        });
+        
+        refreshCenterPane(centerPane);
         pane.setTop(heading("LOG EVENT"));
         Button btnLogEvent = new Button("Submit Event!");
 
         centerPane.add(labelText("Location:"), 0, 0);
         centerPane.add(labelText("Miles:"), 0, 1);
-        centerPane.add((new ComboBox<Object>()), 1, 0);
-        centerPane.add((new ComboBox<Object>()), 1, 1);
+        centerPane.add(cboLocation, 1, 0);
+        centerPane.add(cboMiles, 1, 1);
         centerPane.add((btnLogEvent), 0, 2);
-        
+        btnLogEvent.setStyle(buttonStyle);
 
         addBackButton();
     }
