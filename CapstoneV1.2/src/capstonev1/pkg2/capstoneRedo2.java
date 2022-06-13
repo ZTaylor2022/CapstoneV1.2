@@ -9,7 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
+<<<<<<< HEAD
 import java.util.Set;
+=======
+import java.util.ArrayList;
+>>>>>>> Ziltz
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -46,6 +50,8 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javax.swing.JComboBox;
+import oracle.jdbc.pool.OracleDataSource;
 
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
@@ -306,8 +312,20 @@ public class capstoneRedo2 extends Application {
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
 
-        volunteerCheckInButton.setOnAction(e -> volunteerCheckIO("In"));
-        volunteerCheckOutButton.setOnAction(e -> volunteerCheckIO("Out"));
+        volunteerCheckInButton.setOnAction(e -> {
+            try {
+                volunteerCheckIO("In");
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        volunteerCheckOutButton.setOnAction(e -> {
+            try {
+                volunteerCheckIO("Out");
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         logEventButton.setOnAction(e -> logEvent());
         reportsButton.setOnAction(e -> reports());
         assignSpecButton.setOnAction(e -> assignSpec());
@@ -349,25 +367,65 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
     }
+<<<<<<< HEAD
 
     public void volunteerCheckIO(String type) {
+=======
+    public void volunteerCheckIO(String type) throws SQLException {
+>>>>>>> Ziltz
         refreshCenterPane(centerPane);
+        
+        ObservableList<String> Times = 
+        FXCollections.observableArrayList(
+            "9:00 A.M",
+            "10:00 A.M",
+            "11:00 A.M",
+            "12:00 A.M",
+            "1:00 P.M",
+            "2:00 P.M",
+            "3:00 P.M",
+            "4:00 P.M",
+            "5:00 P.M"
+        );
+        
+    ComboBox<String> cboTimein = new ComboBox<>(Times);
+    ComboBox<String> cboTasks = new ComboBox<>();
+    ComboBox<String> cboLocation = new ComboBox<>();
+    ComboBox<String> cboTimeout = new ComboBox<>(Times);
 
         pane.setTop(heading("Volunteer Check " + type));
-
+   
         if (type.equals("In")) {
             centerPane.add(labelText("Available Tasks: "), 0, 0);
-            centerPane.add(labelText("Available Events: "), 0, 1);
+            centerPane.add(labelText("Check-In Location: "), 0, 1);
             centerPane.add(labelText("Time In: "), 0, 2);
-            centerPane.add((new ComboBox<Object>()), 1, 0);
-            centerPane.add((new ComboBox<Object>()), 1, 1);
-            centerPane.add((new ComboBox<Object>()), 1, 2);
+            centerPane.add(cboTasks, 1, 0);
+            centerPane.add(cboLocation, 1, 1);
+            centerPane.add(cboTimein, 1, 2);
         } else if (type.equals("Out")) {
             centerPane.add(labelText("Event: "), 0, 0);
             centerPane.add(labelText("Time Out: "), 0, 1);
             centerPane.add((new ComboBox<Object>()), 1, 0);
-            centerPane.add((new ComboBox<Object>()), 1, 1);
+            centerPane.add(cboTimeout, 1, 1);
         }
+        
+        
+          String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+            ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+            ResultSet rsTasks = statement.executeQuery("select distinct Task from Events");
+            while (rsTasks.next()) {
+                cboTasks.getItems().add(rsTasks.getString(1));
+            }
+            
+            ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
+            while (rsLocation.next()) {
+                cboLocation.getItems().add(rsLocation.getString(1));
+            }
+       
 
         addBackButton();
     }
