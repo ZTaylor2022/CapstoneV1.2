@@ -17,8 +17,10 @@ import static javafx.application.Application.launch;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import static javafx.collections.FXCollections.observableArrayList;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventType;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import static javafx.geometry.Orientation.VERTICAL;
@@ -240,7 +242,6 @@ public class capstoneRedo2 extends Application {
                 alert.setHeaderText("Please enter all data");
                 alert.showAndWait();
             } else {
-
                 App submittedApp = new App( //create new application 
                         applicationFirstName.getText(),
                         applicationLastName.getText(),
@@ -316,6 +317,7 @@ public class capstoneRedo2 extends Application {
     }
 
     public void assignSpec() {
+        DBConnection conn = new DBConnection();
         refreshCenterPane(centerPane);
 
         Button assignSpecButton = new Button("Submit Specialization");
@@ -324,12 +326,21 @@ public class capstoneRedo2 extends Application {
         pane.setTop(heading("Assign a Specialization"));
 
         centerPane.add(subHeading("Make Selection"), 0, 0);
-        centerPane.add(labelText("Employee:"), 0, 1);
+        centerPane.add(labelText("Volunteer:"), 0, 1);
         centerPane.add(labelText("Specialization:"), 0, 2);
-
-        centerPane.add((new ComboBox<Object>()), 1, 1);
-        centerPane.add((new ComboBox<Object>()), 1, 2);
-
+        ComboBox<String> specializations = new ComboBox<>();
+        ComboBox<Volunteer> volunteersList = new ComboBox<>();
+        try {
+            String query = "Select distinct specialization from volunteers";
+            conn.sendDBCommand(query);
+           while (conn.dbResults.next()) {
+                specializations.getItems().add(conn.dbResults.getString("specialization"));
+            }
+        } catch (SQLException ex) {
+        }
+        specializations.setEditable(true);
+        centerPane.add(volunteersList, 1, 1);
+        centerPane.add(specializations, 1, 2);
         centerPane.add(assignSpecButton, 1, 3);
 
         addBackButton();
