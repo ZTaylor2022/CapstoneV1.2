@@ -85,6 +85,9 @@ public class App {
     public void setEmail(String email){
         this.email = email;
     }
+    public void setPassword(String p){
+        this.password = p;
+    }
     public void setPhone(String phone){
         this.phone = phone;
     }
@@ -93,5 +96,33 @@ public class App {
     }
     public void setExperience(String exp){
         this.experience = exp;
+    }
+    public boolean isUserValid(String x){
+        boolean emailCheck = false;
+        int i = 0;
+        for(i=0;i<apps.length;i++){
+            if (apps[i].email != x){
+                i++;
+            }
+            else{
+                emailCheck = true;
+            }
+            
+        }
+        return emailCheck;
+    }
+    public boolean isPasswordValid(String y){
+        boolean passwordCheck = false;
+        int i = 0;
+        for(i=0;i<apps.length;i++){
+            if (apps[i].password != y){
+                i++;
+            }
+            else{
+                passwordCheck = true;
+            }
+            
+        }
+        return passwordCheck;
     }
 }
