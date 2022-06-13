@@ -13,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -358,17 +360,57 @@ public class capstoneRedo2 extends Application {
     }
 
     public void logEvent() {
+
+        
+        // try to populate based off db, "select distinct location from events"
+        ObservableList<String> location = FXCollections.observableArrayList(
+                "Charlottesville",
+                "Luray",
+                "Lynchburg",
+                "Richmond",
+                "Washington");
+        
+        // maybe add a "New Locations" button
+        
+        ComboBox cboLocation = new ComboBox(location);
+        final TextField txtMileage = new TextField();
+        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ObservableValue ov, Object t, Object t1) {
+                switch (t1.toString()) {
+                    case "Charlottesville":
+                        txtMileage.setText("62"); // also try and populate miles txtField from db
+                        break;
+                    case "Luray":
+                        txtMileage.setText("33");
+                        break;
+                    case "Lynchburg":
+                        txtMileage.setText("97");
+                        break;
+                    case "Richmond":
+                        txtMileage.setText("130");
+                        break;
+                    case "Washington":
+                        txtMileage.setText("132");
+                        break;
+                }
+            }        
+        });
+        
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("LOG EVENT"));
-        Button btnLogEvent = new Button("Submit Event!");
+        Button submitEvent = new Button("Submit Event!");
 
         centerPane.add(labelText("Location:"), 0, 0);
-        centerPane.add(labelText("Miles:"), 0, 1);
-        centerPane.add((new ComboBox<Object>()), 1, 0);
-        centerPane.add((new ComboBox<Object>()), 1, 1);
-        centerPane.add((btnLogEvent), 0, 2);
+        centerPane.add(labelText("Mileage:"), 0, 1);
+        centerPane.add(cboLocation, 1, 0);
+        centerPane.add(txtMileage, 1, 1);
+        centerPane.add(submitEvent, 0, 2);
+        submitEvent.setStyle(buttonStyle);
         
+       
 
         addBackButton();
     }
