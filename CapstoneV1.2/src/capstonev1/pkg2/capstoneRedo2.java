@@ -50,6 +50,7 @@ import javafx.scene.text.Text;
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
 
+    //Making a comment fknlslfm;ammk
     /*
     TO DO:
     1. Add specilization and social pages
