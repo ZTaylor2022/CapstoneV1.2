@@ -12,8 +12,9 @@ package capstonev1.pkg2;
 public class App {
     //Data fields
     public int appID;
-    public String aFirst,aLast,dob,email, phone, address, experience;
+    public String aFirst,aLast,dob,email, password, phone, address, experience;
     static public int appCount = 200;
+    public static App[] apps = new App[1000];
     
     public App(){
         this.appID = appCount;
@@ -21,18 +22,20 @@ public class App {
         this.aLast = null;
         this.dob = null;
         this.email = null;
+        this.password = null;
         this.phone = null;
         this.address = null;
         this.experience = null;
         appCount++;
     }
-    public App(String aFirst,String aLast,String dob,String email, 
+    public App(String aFirst,String aLast,String dob,String email,String pass,
         String phone, String address, String experience){
         this.appID = appCount;
         this.aFirst = aFirst;
         this.aLast = aLast;
         this.dob = dob;
         this.email = email;
+        this.password = pass;
         this.phone = phone;
         this.address = address;
         this.experience = experience;
@@ -52,6 +55,9 @@ public class App {
     }
     public String getEmail(){
         return email;
+    }
+    public String getPassword(){
+        return password;
     }
     public String getPhone(){
         return phone;
