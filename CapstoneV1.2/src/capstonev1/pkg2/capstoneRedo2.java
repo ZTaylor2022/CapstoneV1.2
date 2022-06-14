@@ -335,7 +335,13 @@ public class capstoneRedo2 extends Application {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        logEventButton.setOnAction(e -> logEvent());
+        logEventButton.setOnAction(e -> {
+            try {
+                logEvent();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         reportsButton.setOnAction(e -> reports());
         assignSpecButton.setOnAction(e -> assignSpec());
 
@@ -452,46 +458,105 @@ public class capstoneRedo2 extends Application {
         addBackButton();
     }
 
-    public void logEvent() {
-
-        // try to populate based off db, "select distinct location from events"
-        ObservableList<Object> location = FXCollections.observableArrayList(
-                "Charlottesville",
-                "Luray",
-                "Lynchburg",
-                "Richmond",
-                "Washington");
+    public void logEvent() throws SQLException {
 
         // maybe add a "New Locations" button
-        ComboBox cboLocation = new ComboBox(location);
-        final TextField txtMileage = new TextField();
-        Button addEvent = new Button("Add New Location");
-        Label lblOr = new Label("---Or Add New Location---");
-        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ComboBox<String> cboLocation = new ComboBox<>();
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-            @Override
-            public void changed(ObservableValue ov, Object t, Object t1) {
-                switch (t1.toString()) {
-                    case "Charlottesville":
-                        txtMileage.setText("62"); // also try and populate miles txtField from db
-                        break;
-                    case "Luray":
-                        txtMileage.setText("33");
-                        break;
-                    case "Lynchburg":
-                        txtMileage.setText("97");
-                        break;
-                    case "Richmond":
-                        txtMileage.setText("130");
-                        break;
-                    case "Washington":
-                        txtMileage.setText("132");
-                        break;
+        ResultSet rsLocation = statement.executeQuery("select distinct location from Events");
+        while (rsLocation.next()) {
+            cboLocation.getItems().add(rsLocation.getString(1));
+
+            final TextField txtMileage = new TextField();
+            Button addEvent = new Button("Add New");
+            Label lblOr = new Label("---Or Add New Event Location---");
+            cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+                @Override
+                public void changed(ObservableValue ov, Object t, Object t1) {
+                    switch (t1.toString()) {
+                        case "Charlottesville":
+                            txtMileage.setText("62"); // also try and populate miles txtField from db
+                            break;
+                        case "Luray":
+                            txtMileage.setText("33");
+                            break;
+                        case "Lynchburg":
+                            txtMileage.setText("97");
+                            break;
+                        case "Richmond":
+                            txtMileage.setText("130");
+                            break;
+                        case "Washington":
+                            txtMileage.setText("132");
+                            break;
+                    }
                 }
-            }
-        });
+            });
 
-        refreshCenterPane(centerPane);
+
+            refreshCenterPane(centerPane);
+
+            pane.setTop(heading("LOG EVENT"));
+            Button submitEvent = new Button("Submit Event!");
+
+            centerPane.add(labelText("Location:"), 0, 0);
+            centerPane.add(labelText("Mileage:"), 0, 1);
+            centerPane.add(cboLocation, 1, 0);
+            centerPane.add(txtMileage, 1, 1);
+            centerPane.add(submitEvent, 0, 2);
+            centerPane.add(lblOr, 1, 5);
+            centerPane.add(addEvent, 1, 7);
+            submitEvent.setStyle(buttonStyle);
+            addEvent.setStyle(buttonStyle);
+            addBackButton();
+
+            addEvent.setOnAction((ActionEvent e) -> {
+                refreshCenterPane(centerPane);
+                TextField txtNewLoc = new TextField();
+                TextField txtNewMileage = new TextField();
+                TextField txtNewTask = new TextField();
+                Button btnSubmitNew = new Button("Submit New Event!");
+                final ComboBox<Integer> cboMaxV = new ComboBox<Integer>();
+                cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+                pane.setTop(heading("ADD NEW EVENT"));
+                centerPane.add(labelText("Location:"), 0, 0);
+                centerPane.add(txtNewLoc, 1, 0);
+                centerPane.add(labelText("Mileage"), 0, 1);
+                centerPane.add(txtNewMileage, 1, 1);
+                centerPane.add(labelText("Task:"), 0, 2);
+                centerPane.add(txtNewTask, 1, 2);
+                centerPane.add(labelText("Maximum Volunteers:"), 0, 3);
+                centerPane.add(cboMaxV, 1, 3);
+                centerPane.add(btnSubmitNew, 0, 4);
+                btnSubmitNew.setStyle(buttonStyle);
+
+                addBackButton(); // can add previous button to get back to existing locations
+
+            });
+
+            submitEvent.setOnAction((ActionEvent e) -> {
+                DBConnection conn = new DBConnection();
+                String query = "Select location, mileage from events";
+                try {
+                    conn.sendDBCommand(query);
+                    while (conn.dbResults.next()) { //get database data
+                        Event dbEvent = new Event();
+     //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                        dbEvent.setLocation(conn.dbResults.getString(1));
+                        dbEvent.setMileage(conn.dbResults.getString(2));
+//                    dbEvent.setTask(conn.dbResults.getString(4));
+//                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
+
+                    }
+                    conn.dbResults.close();
+                } catch (SQLException ex) {
 
         pane.setTop(heading("LOG EVENT"));
         Button submitEvent = new Button("Submit Event!");
@@ -534,16 +599,14 @@ public class capstoneRedo2 extends Application {
 //                    dbEvent.setTask(conn.dbResults.getString(4));
 //                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
 
+
                 }
-                conn.dbResults.close();
-            } catch (SQLException ex) {
-            }
-            //give error if information isn't complete
-            if (txtMileage.getText().isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please enter all data");
-                alert.showAndWait();
-            } else {
+                //give error if information isn't complete
+                if (txtMileage.getText().isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please enter all data");
+                    alert.showAndWait();
+                } else {
 //                
 //                Event submittedEvent = new Event( //create new event
 //                        cboLocation.getValue(),
@@ -558,12 +621,13 @@ public class capstoneRedo2 extends Application {
 //                //clear text fields after submission
 //                cboLocation.setValue(null);
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                alert.setHeaderText("Event Logged, \n"
-                        + "Thank You For Your Help!");
-                alert.showAndWait();
-            }
-        });
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Event Logged, \n"
+                            + "Thank You For Your Help!");
+                    alert.showAndWait();
+                }
+            });
+        }
     }
 
     public void reports() {
