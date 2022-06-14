@@ -197,8 +197,8 @@ public class capstoneRedo2 extends Application {
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
         ObservableList<String> experienceList = FXCollections.observableArrayList();
-         try {
-            
+        try {
+
             String query = "Select distinct experience from application";
             conn.sendDBCommand(query);
             while (conn.dbResults.next()) {
@@ -357,24 +357,29 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Volunteer:"), 0, 1);
         centerPane.add(labelText("Specialization:"), 0, 2);
         ComboBox<String> specializations = new ComboBox<>();
-        ComboBox<Volunteer> volunteersList = new ComboBox<>();
+        ComboBox<String> volunteersList = new ComboBox<>();
         try {
             String query = "Select distinct specialization from volunteers";
             conn.sendDBCommand(query);
-           while (conn.dbResults.next()) {
+            while (conn.dbResults.next()) {
                 specializations.getItems().add(conn.dbResults.getString("specialization"));
             }
         } catch (SQLException ex) {
         }
-         try { //trying to get the volunteers names for the volunteer combobox
-            String query = "Select a.firstName, a.lastName, v.specialization "
+        try { //trying to get the volunteers names for the volunteer combobox
+            String query = "Select a.firstName, a.lastName "
                     + "from application a, volunteers v "
                     + "where a.applicationID = v.applicationID";
             conn.sendDBCommand(query);
-            while(conn.dbResults.next()){
-            String firstName = conn.dbResults.getString(1);
-            String lastName = conn.dbResults.getString(2);
-            String specialization = conn.dbResults.getString(3);
+            while (conn.dbResults.next()) {
+                String firstName = conn.dbResults.getString(1); //getting first name from application table
+                String lastName = conn.dbResults.getString(2); //getting last name from application table
+                String fullName = firstName + lastName; //combining into one string to add to the combobox
+                volunteersList.getItems().add(fullName); //populate combo box for volunteers????
+                assignSpecButton.setOnAction(e -> {
+                    //code to update sql database when button is clicked
+                });
+
             }
         } catch (SQLException ex) {
 
@@ -390,32 +395,30 @@ public class capstoneRedo2 extends Application {
 
     }
 
-
     //public void volunteerCheckIO(String type) {
-
     public void volunteerCheckIO(String type) throws SQLException {
-         refreshCenterPane(centerPane);
-        
-        ObservableList<String> Times = 
-        FXCollections.observableArrayList( 
-            "9:00 A.M",
-            "10:00 A.M",
-            "11:00 A.M",
-            "12:00 A.M",
-            "1:00 P.M",
-            "2:00 P.M",
-            "3:00 P.M",
-            "4:00 P.M",
-            "5:00 P.M"
-        );
-        
-    ComboBox<String> cboTimein = new ComboBox<>(Times);
-    ComboBox<String> cboTasks = new ComboBox<>();
-    ComboBox<String> cboLocation = new ComboBox<>();
-    ComboBox<String> cboTimeout = new ComboBox<>(Times);
+        refreshCenterPane(centerPane);
+
+        ObservableList<String> Times
+                = FXCollections.observableArrayList(
+                        "9:00 A.M",
+                        "10:00 A.M",
+                        "11:00 A.M",
+                        "12:00 A.M",
+                        "1:00 P.M",
+                        "2:00 P.M",
+                        "3:00 P.M",
+                        "4:00 P.M",
+                        "5:00 P.M"
+                );
+
+        ComboBox<String> cboTimein = new ComboBox<>(Times);
+        ComboBox<String> cboTasks = new ComboBox<>();
+        ComboBox<String> cboLocation = new ComboBox<>();
+        ComboBox<String> cboTimeout = new ComboBox<>(Times);
 
         pane.setTop(heading("Volunteer Check " + type));
-   
+
         if (type.equals("In")) {
             centerPane.add(labelText("Available Tasks: "), 0, 0);
             centerPane.add(labelText("Check-In Location: "), 0, 1);
@@ -429,24 +432,22 @@ public class capstoneRedo2 extends Application {
             centerPane.add((new ComboBox<Object>()), 1, 0);
             centerPane.add(cboTimeout, 1, 1);
         }
-        
-        
-          String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-            ds.setURL(connectionString);
+
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-            ResultSet rsTasks = statement.executeQuery("select distinct Task from Events");
-            while (rsTasks.next()) {
-                cboTasks.getItems().add(rsTasks.getString(1));
-            }
-            
-            ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
-            while (rsLocation.next()) {
-                cboLocation.getItems().add(rsLocation.getString(1));
-            }
-       
+        ResultSet rsTasks = statement.executeQuery("select distinct Task from Events");
+        while (rsTasks.next()) {
+            cboTasks.getItems().add(rsTasks.getString(1));
+        }
+
+        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
+        while (rsLocation.next()) {
+            cboLocation.getItems().add(rsLocation.getString(1));
+        }
 
         addBackButton();
     }
@@ -505,21 +506,19 @@ public class capstoneRedo2 extends Application {
         submitEvent.setStyle(buttonStyle);
         addEvent.setStyle(buttonStyle);
         addBackButton();
-        
+
         addEvent.setOnAction((ActionEvent e) -> {
             refreshCenterPane(centerPane);
             TextField txtNewLoc = new TextField();
             TextField txtNewMileage = new TextField();
-            
+
             centerPane.add(labelText("Location:"), 0, 0);
             centerPane.add(txtNewLoc, 1, 0);
             centerPane.add(labelText("Mileage"), 0, 1);
             centerPane.add(labelText("Task"), 0, 2);
             pane.setTop(heading("ADD NEW EVENT"));
             addBackButton(); // can add previous button to get back to existing locations
-            
 
-      
         });
 
         submitEvent.setOnAction((ActionEvent e) -> {
@@ -529,12 +528,12 @@ public class capstoneRedo2 extends Application {
                 conn.sendDBCommand(query);
                 while (conn.dbResults.next()) { //get database data
                     Event dbEvent = new Event();
- //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
                     dbEvent.setLocation(conn.dbResults.getString(1));
                     dbEvent.setMileage(conn.dbResults.getString(2));
 //                    dbEvent.setTask(conn.dbResults.getString(4));
 //                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
-                    
+
                 }
                 conn.dbResults.close();
             } catch (SQLException ex) {
