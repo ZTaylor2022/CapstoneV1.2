@@ -9,7 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+
+import java.util.Set;
+
+import java.util.ArrayList;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -46,6 +50,8 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javax.swing.JComboBox;
+import oracle.jdbc.pool.OracleDataSource;
 
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
@@ -315,8 +321,20 @@ public class capstoneRedo2 extends Application {
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
 
-        volunteerCheckInButton.setOnAction(e -> volunteerCheckIO("In"));
-        volunteerCheckOutButton.setOnAction(e -> volunteerCheckIO("Out"));
+        volunteerCheckInButton.setOnAction(e -> {
+            try {
+                volunteerCheckIO("In");
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        volunteerCheckOutButton.setOnAction(e -> {
+            try {
+                volunteerCheckIO("Out");
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         logEventButton.setOnAction(e -> logEvent());
         reportsButton.setOnAction(e -> reports());
         assignSpecButton.setOnAction(e -> assignSpec());
@@ -375,72 +393,101 @@ public class capstoneRedo2 extends Application {
 
     }
 
-    public void volunteerCheckIO(String type) {
-        refreshCenterPane(centerPane);
+
+    //public void volunteerCheckIO(String type) {
+
+    public void volunteerCheckIO(String type) throws SQLException {
+         refreshCenterPane(centerPane);
+        
+        ObservableList<String> Times = 
+        FXCollections.observableArrayList( 
+            "9:00 A.M",
+            "10:00 A.M",
+            "11:00 A.M",
+            "12:00 A.M",
+            "1:00 P.M",
+            "2:00 P.M",
+            "3:00 P.M",
+            "4:00 P.M",
+            "5:00 P.M"
+        );
+        
+    ComboBox<String> cboTimein = new ComboBox<>(Times);
+    ComboBox<String> cboTasks = new ComboBox<>();
+    ComboBox<String> cboLocation = new ComboBox<>();
+    ComboBox<String> cboTimeout = new ComboBox<>(Times);
 
         pane.setTop(heading("Volunteer Check " + type));
-
+   
         if (type.equals("In")) {
             centerPane.add(labelText("Available Tasks: "), 0, 0);
-            centerPane.add(labelText("Available Events: "), 0, 1);
+            centerPane.add(labelText("Check-In Location: "), 0, 1);
             centerPane.add(labelText("Time In: "), 0, 2);
-            centerPane.add((new ComboBox<Object>()), 1, 0);
-            centerPane.add((new ComboBox<Object>()), 1, 1);
-            centerPane.add((new ComboBox<Object>()), 1, 2);
+            centerPane.add(cboTasks, 1, 0);
+            centerPane.add(cboLocation, 1, 1);
+            centerPane.add(cboTimein, 1, 2);
         } else if (type.equals("Out")) {
             centerPane.add(labelText("Event: "), 0, 0);
             centerPane.add(labelText("Time Out: "), 0, 1);
             centerPane.add((new ComboBox<Object>()), 1, 0);
-            centerPane.add((new ComboBox<Object>()), 1, 1);
+            centerPane.add(cboTimeout, 1, 1);
         }
+        
+        
+          String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+            ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+            ResultSet rsTasks = statement.executeQuery("select distinct Task from Events");
+            while (rsTasks.next()) {
+                cboTasks.getItems().add(rsTasks.getString(1));
+            }
+            
+            ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
+            while (rsLocation.next()) {
+                cboLocation.getItems().add(rsLocation.getString(1));
+            }
+       
 
         addBackButton();
     }
 
-    public void logEvent() {
-
-        ObservableList<String> location = FXCollections.observableArrayList(
+    public void logEvent
+        ObservableList<String> location = FXCollections.observableArrayList
+        // try to populate based off db, "select distinct location from events"
+        ObservableList<Object> location = FXCollections.observableArrayList(
                 "Charlottesville",
                 "Luray",
                 "Lynchburg",
                 "Richmond",
                 "Washington");
-        // try to populate based off db
-        // "select distinct location from events"
-        // maybe add a "New Locations" button
-        final ObservableList<String> cvilleMiles = FXCollections.observableArrayList(
-                "62");
-        final ObservableList<String> lurayMiles = FXCollections.observableArrayList(
-                "33");
-        final ObservableList<String> lynchburgMiles = FXCollections.observableArrayList(
-                "97");
-        final ObservableList<String> richmondMiles = FXCollections.observableArrayList(
-                "130");
-        final ObservableList<String> washMiles = FXCollections.observableArrayList(
-                "132");
 
+        // maybe add a "New Locations" button
         ComboBox cboLocation = new ComboBox(location);
-        final ComboBox cboMiles = new ComboBox();
+        final TextField txtMileage = new TextField();
+        Button addEvent = new Button("Add New Location");
+        Label lblOr = new Label("---Or Add New Location---");
         cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue ov, Object t, Object t1) {
-
                 switch (t1.toString()) {
                     case "Charlottesville":
-                        cboMiles.setItems(cvilleMiles);
+                        txtMileage.setText("62"); // also try and populate miles txtField from db
                         break;
                     case "Luray":
-                        cboMiles.setItems(lurayMiles);
+                        txtMileage.setText("33");
                         break;
                     case "Lynchburg":
-                        cboMiles.setItems(lynchburgMiles);
+                        txtMileage.setText("97");
                         break;
                     case "Richmond":
-                        cboMiles.setItems(richmondMiles);
+                        txtMileage.setText("130");
                         break;
                     case "Washington":
-                        cboMiles.setItems(washMiles);
+                        txtMileage.setText("132");
                         break;
                 }
 
@@ -448,17 +495,80 @@ public class capstoneRedo2 extends Application {
         });
 
         refreshCenterPane(centerPane);
+
         pane.setTop(heading("LOG EVENT"));
-        Button btnLogEvent = new Button("Submit Event!");
+        Button submitEvent = new Button("Submit Event!");
 
         centerPane.add(labelText("Location:"), 0, 0);
-        centerPane.add(labelText("Miles:"), 0, 1);
+        centerPane.add(labelText("Mileage:"), 0, 1);
         centerPane.add(cboLocation, 1, 0);
-        centerPane.add(cboMiles, 1, 1);
-        centerPane.add((btnLogEvent), 0, 2);
-        btnLogEvent.setStyle(buttonStyle);
-
+        centerPane.add(txtMileage, 1, 1);
+        centerPane.add(submitEvent, 0, 2);
+        centerPane.add(lblOr, 1, 5);
+        centerPane.add(addEvent, 1, 7);
+        submitEvent.setStyle(buttonStyle);
+        addEvent.setStyle(buttonStyle);
         addBackButton();
+        
+        addEvent.setOnAction((ActionEvent e) -> {
+            refreshCenterPane(centerPane);
+            TextField txtNewLoc = new TextField();
+            TextField txtNewMileage = new TextField();
+            
+            centerPane.add(labelText("Location:"), 0, 0);
+            centerPane.add(txtNewLoc, 1, 0);
+            centerPane.add(labelText("Mileage"), 0, 1);
+            centerPane.add(labelText("Task"), 0, 2);
+            pane.setTop(heading("ADD NEW EVENT"));
+            addBackButton(); // can add previous button to get back to existing locations
+            
+
+      
+        });
+
+        submitEvent.setOnAction((ActionEvent e) -> {
+            DBConnection conn = new DBConnection();
+            String query = "Select location, mileage from events";
+            try {
+                conn.sendDBCommand(query);
+                while (conn.dbResults.next()) { //get database data
+                    Event dbEvent = new Event();
+ //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                    dbEvent.setLocation(conn.dbResults.getString(1));
+                    dbEvent.setMileage(conn.dbResults.getString(2));
+//                    dbEvent.setTask(conn.dbResults.getString(4));
+//                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
+                    
+                }
+                conn.dbResults.close();
+            } catch (SQLException ex) {
+            }
+            //give error if information isn't complete
+            if (txtMileage.getText().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Please enter all data");
+                alert.showAndWait();
+            } else {
+//                
+//                Event submittedEvent = new Event( //create new event
+//                        cboLocation.getValue(),
+//                        txtMileage.getText()
+//                        );
+//                String insert = "INSERT INTO EVENTS (EventID, Location, Mileage) VALUES (" + submittedEvent.EventID + ", '"
+//                        + cboLocation.getValue() + "', '" + txtMileage.getText() + "')";
+//                conn.sendDBCommand(insert);
+//                String commit = "commit";
+//                conn.sendDBCommand(commit);
+//
+//                //clear text fields after submission
+//                cboLocation.setValue(null);
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Event Logged, \n"
+                        + "Thank You For Your Help!");
+                alert.showAndWait();
+            }
+        });
     }
 
     public void reports() {

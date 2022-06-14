@@ -14,6 +14,7 @@ public class App {
     public int appID;
     public String aFirst,aLast,dob,email, phone, address, experience;
     static public int appCount = 200;
+    public static App[] apps = new App[1000];
     
     public App(){
         this.appID = appCount;
@@ -26,7 +27,7 @@ public class App {
         this.experience = null;
         appCount++;
     }
-    public App(String aFirst,String aLast,String dob,String email, 
+    public App(String aFirst,String aLast,String dob,String email,
         String phone, String address, String experience){
         this.appID = appCount;
         this.aFirst = aFirst;
@@ -53,6 +54,7 @@ public class App {
     public String getEmail(){
         return email;
     }
+   
     public String getPhone(){
         return phone;
     }
@@ -79,6 +81,7 @@ public class App {
     public void setEmail(String email){
         this.email = email;
     }
+   
     public void setPhone(String phone){
         this.phone = phone;
     }
@@ -88,4 +91,5 @@ public class App {
     public void setExperience(String exp){
         this.experience = exp;
     }
+    
 }
