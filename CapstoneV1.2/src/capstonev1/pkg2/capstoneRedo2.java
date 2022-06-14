@@ -344,25 +344,28 @@ public class capstoneRedo2 extends Application {
 
         pane.setTop(heading("Assign a Specialization"));
 
+        ComboBox<String> specializations = new ComboBox<>();
+        ComboBox<Volunteer> volunteersList = new ComboBox<>();
         centerPane.add(subHeading("Make Selection"), 0, 0);
         centerPane.add(labelText("Volunteer:"), 0, 1);
         centerPane.add(labelText("Specialization:"), 0, 2);
-        ComboBox<String> specializations = new ComboBox<>();
-        ComboBox<Volunteer> volunteersList = new ComboBox<>();
-        try {
-            String query = "Select distinct specialization from volunteers";
-            conn.sendDBCommand(query);
-           while (conn.dbResults.next()) {
-                specializations.getItems().add(conn.dbResults.getString("specialization"));
-            }
-        } catch (SQLException ex) {
-        }
+//        centerPane.add(volunteersList,1,1);
+//        centerPane.add(specializations,1,2);
         specializations.setEditable(true);
         centerPane.add(volunteersList, 1, 1);
         centerPane.add(specializations, 1, 2);
         centerPane.add(assignSpecButton, 1, 3);
 
         addBackButton();
+        try {
+            String query = "Select distinct specialization from volunteers";
+            conn.sendDBCommand(query);
+           while (conn.dbResults.next()) {
+                specializations.getItems().add(conn.dbResults.getString("Select distinct specialization from volunteers"));
+            }
+        } catch (SQLException ex) {
+        }
+        
 
         pane.setCenter(centerPane);
 
