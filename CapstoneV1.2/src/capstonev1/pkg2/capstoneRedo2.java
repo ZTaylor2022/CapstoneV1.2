@@ -184,6 +184,7 @@ public class capstoneRedo2 extends Application {
     }
 
     public void applicationScreen() {
+        DBConnection conn = new DBConnection();
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("Volunteer Application"));
@@ -195,7 +196,16 @@ public class capstoneRedo2 extends Application {
         TextField applicationPhone = new TextField();
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
-        ObservableList<String> experienceList = FXCollections.observableArrayList("Novice", "Intermediate", "Expert");
+        ObservableList<String> experienceList = FXCollections.observableArrayList();
+        try {
+
+            String query = "Select distinct experience from application";
+            conn.sendDBCommand(query);
+            while (conn.dbResults.next()) {
+                experienceList.add(conn.dbResults.getString("experience"));
+            }
+        } catch (SQLException ex) {
+        }
 
         Button applicationSubmit = new Button("Submit Application");
         applicationSubmit.setStyle(buttonStyle);
@@ -223,7 +233,6 @@ public class capstoneRedo2 extends Application {
         applicationExperience.setItems(experienceList);
 
         applicationSubmit.setOnAction(e -> {
-            DBConnection conn = new DBConnection();
             String query = "Select * from application";
             try {
                 conn.sendDBCommand(query);
@@ -354,7 +363,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Volunteer:"), 0, 1);
         centerPane.add(labelText("Specialization:"), 0, 2);
         ComboBox<String> specializations = new ComboBox<>();
-        ComboBox<Volunteer> volunteersList = new ComboBox<>();
+        ComboBox<String> volunteersList = new ComboBox<>();
         try {
             String query = "Select distinct specialization from volunteers";
             conn.sendDBCommand(query);
@@ -362,6 +371,24 @@ public class capstoneRedo2 extends Application {
                 specializations.getItems().add(conn.dbResults.getString("specialization"));
             }
         } catch (SQLException ex) {
+        }
+        try { //trying to get the volunteers names for the volunteer combobox
+            String query = "Select a.firstName, a.lastName "
+                    + "from application a, volunteers v "
+                    + "where a.applicationID = v.applicationID";
+            conn.sendDBCommand(query);
+            while (conn.dbResults.next()) {
+                String firstName = conn.dbResults.getString(1); //getting first name from application table
+                String lastName = conn.dbResults.getString(2); //getting last name from application table
+                String fullName = firstName + lastName; //combining into one string to add to the combobox
+                volunteersList.getItems().add(fullName); //populate combo box for volunteers????
+                assignSpecButton.setOnAction(e -> {
+                    //code to update sql database when button is clicked
+                });
+
+            }
+        } catch (SQLException ex) {
+
         }
         specializations.setEditable(true);
         centerPane.add(volunteersList, 1, 1);
@@ -472,6 +499,7 @@ public class capstoneRedo2 extends Application {
                 }
             });
 
+
             refreshCenterPane(centerPane);
 
             pane.setTop(heading("LOG EVENT"));
@@ -529,6 +557,49 @@ public class capstoneRedo2 extends Application {
                     }
                     conn.dbResults.close();
                 } catch (SQLException ex) {
+
+        pane.setTop(heading("LOG EVENT"));
+        Button submitEvent = new Button("Submit Event!");
+
+        centerPane.add(labelText("Location:"), 0, 0);
+        centerPane.add(labelText("Mileage:"), 0, 1);
+        centerPane.add(cboLocation, 1, 0);
+        centerPane.add(txtMileage, 1, 1);
+        centerPane.add(submitEvent, 0, 2);
+        centerPane.add(lblOr, 1, 5);
+        centerPane.add(addEvent, 1, 7);
+        submitEvent.setStyle(buttonStyle);
+        addEvent.setStyle(buttonStyle);
+        addBackButton();
+
+        addEvent.setOnAction((ActionEvent e) -> {
+            refreshCenterPane(centerPane);
+            TextField txtNewLoc = new TextField();
+            TextField txtNewMileage = new TextField();
+
+            centerPane.add(labelText("Location:"), 0, 0);
+            centerPane.add(txtNewLoc, 1, 0);
+            centerPane.add(labelText("Mileage"), 0, 1);
+            centerPane.add(labelText("Task"), 0, 2);
+            pane.setTop(heading("ADD NEW EVENT"));
+            addBackButton(); // can add previous button to get back to existing locations
+
+        });
+
+        submitEvent.setOnAction((ActionEvent e) -> {
+            DBConnection conn = new DBConnection();
+            String query = "Select location, mileage from events";
+            try {
+                conn.sendDBCommand(query);
+                while (conn.dbResults.next()) { //get database data
+                    Event dbEvent = new Event();
+                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                    dbEvent.setLocation(conn.dbResults.getString(1));
+                    dbEvent.setMileage(conn.dbResults.getString(2));
+//                    dbEvent.setTask(conn.dbResults.getString(4));
+//                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
+
+
                 }
                 //give error if information isn't complete
                 if (txtMileage.getText().isEmpty()) {
