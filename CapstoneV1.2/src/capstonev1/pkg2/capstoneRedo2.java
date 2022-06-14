@@ -178,6 +178,7 @@ public class capstoneRedo2 extends Application {
     }
 
     public void applicationScreen() {
+        DBConnection conn = new DBConnection();
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("Volunteer Application"));
@@ -189,7 +190,16 @@ public class capstoneRedo2 extends Application {
         TextField applicationPhone = new TextField();
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
-        ObservableList<String> experienceList = FXCollections.observableArrayList("Novice", "Intermediate", "Expert");
+        ObservableList<String> experienceList = FXCollections.observableArrayList();
+        try {
+            
+            String query = "Select distinct experience from application";
+            conn.sendDBCommand(query);
+            while (conn.dbResults.next()) {
+                experienceList.add(conn.dbResults.getString("experience"));
+            }
+        } catch (SQLException ex) {
+        }
 
         Button applicationSubmit = new Button("Submit Application");
         applicationSubmit.setStyle(buttonStyle);
@@ -217,7 +227,6 @@ public class capstoneRedo2 extends Application {
         applicationExperience.setItems(experienceList);
 
         applicationSubmit.setOnAction(e -> {
-            DBConnection conn = new DBConnection();
             String query = "Select * from application";
             try {
                 conn.sendDBCommand(query);
@@ -334,16 +343,32 @@ public class capstoneRedo2 extends Application {
         try {
             String query = "Select distinct specialization from volunteers";
             conn.sendDBCommand(query);
-           while (conn.dbResults.next()) {
+            while (conn.dbResults.next()) {
                 specializations.getItems().add(conn.dbResults.getString("specialization"));
             }
         } catch (SQLException ex) {
+        }
+        try { //trying to get the volunteers names for the volunteer combobox
+            String query = "Select a.firstName, a.lastName, v.specialization "
+                    + "from application a, volunteers v "
+                    + "where a.applicationID = v.applicationID";
+            conn.sendDBCommand(query);
+            while(conn.dbResults.next()){
+            String firstName = conn.dbResults.getString(1);
+            String lastName = conn.dbResults.getString(2);
+            String specialization = conn.dbResults.getString(3);
+            System.out.println(firstName + lastName +specialization);
+            }
+
+        } catch (SQLException ex) {
+
         }
         specializations.setEditable(true);
         centerPane.add(volunteersList, 1, 1);
         centerPane.add(specializations, 1, 2);
         centerPane.add(assignSpecButton, 1, 3);
 
+        //volunteersList.setItems();
         addBackButton();
 
         pane.setCenter(centerPane);
@@ -373,7 +398,7 @@ public class capstoneRedo2 extends Application {
     }
 
     public void logEvent() {
-        
+
         ObservableList<String> location = FXCollections.observableArrayList(
                 "Charlottesville",
                 "Luray",
@@ -419,9 +444,9 @@ public class capstoneRedo2 extends Application {
                         break;
                 }
 
-            }        
+            }
         });
-        
+
         refreshCenterPane(centerPane);
         pane.setTop(heading("LOG EVENT"));
         Button btnLogEvent = new Button("Submit Event!");
