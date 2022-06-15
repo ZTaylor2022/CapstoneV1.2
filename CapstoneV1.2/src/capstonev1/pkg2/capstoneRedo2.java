@@ -373,17 +373,26 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
         try { //trying to get the volunteers names for the volunteer combobox
-            String query = "Select a.firstName, a.lastName "
-                    + "from application a, volunteers v "
+            String query = "Select v.volunteerID, a.firstName, a.lastName "
+                    + "from volunteers v, application a "
                     + "where a.applicationID = v.applicationID";
             conn.sendDBCommand(query);
             while (conn.dbResults.next()) {
-                String firstName = conn.dbResults.getString(1); //getting first name from application table
-                String lastName = conn.dbResults.getString(2); //getting last name from application table
-                String fullName = firstName + lastName; //combining into one string to add to the combobox
-                volunteersList.getItems().add(fullName); //populate combo box for volunteers????
+                int volID = conn.dbResults.getInt(1);
+                String firstName = conn.dbResults.getString(2); //getting first name from application table
+                String lastName = conn.dbResults.getString(3); //getting last name from application table
+                String volInfo = volID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
+                volunteersList.getItems().add(volInfo); //populate combo box for volunteers????
                 assignSpecButton.setOnAction(e -> {
                     //code to update sql database when button is clicked
+                    String selectedVolunteer = volunteersList.getSelectionModel().getSelectedItem();
+                    String[] info = selectedVolunteer.split(" ");
+                    String id = info[0];
+                    String selectedSpec = specializations.getSelectionModel().getSelectedItem();
+                    String sql = "update volunteers set specialization= '" + selectedSpec + "' "
+                            + "where volunteerID= " + id;
+                    conn.sendDBCommand(sql);
+                    
                 });
 
             }
