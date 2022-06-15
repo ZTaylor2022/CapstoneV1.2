@@ -32,6 +32,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -85,7 +86,7 @@ public class capstoneRedo2 extends Application {
             + "-fx-font-family: \"" + fontStyle + "\";";
     String reportButtonStyle = "-fx-background-color: #66CDAA; -fx-text-fill: #FFFFFF;"
             + "-fx-font-family: \"" + fontStyle + "\";";
-    
+
     Button report1 = new Button("Volunteer Hours");
     Button report2 = new Button("Event Attendance");
     Button report3 = new Button("Volunteer \nSpecialization");
@@ -167,7 +168,13 @@ public class capstoneRedo2 extends Application {
         appButton.setStyle(buttonStyle);
 
         loginButton.setOnAction(e -> homeScreen());
-        appButton.setOnAction(e -> applicationScreen());
+        appButton.setOnAction(e -> {
+            try {
+                applicationScreen();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
         centerPane.add(subHeading("VOLUNTEER LOG IN"), 0, 0);
         centerPane.add(labelText("User Name"), 0, 1);
@@ -189,8 +196,13 @@ public class capstoneRedo2 extends Application {
         gP.getChildren().clear();
     }
 
-    public void applicationScreen() {
-        DBConnection conn = new DBConnection();
+    public void applicationScreen() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("Volunteer Application"));
@@ -199,6 +211,7 @@ public class capstoneRedo2 extends Application {
         TextField applicationLastName = new TextField();
         DatePicker applicationDOB = new DatePicker();
         TextField applicationEmail = new TextField();
+        TextField applicationPassword = new TextField();
         TextField applicationPhone = new TextField();
         TextField applicationAddress = new TextField();
         ComboBox<String> applicationExperience = new ComboBox<>();
@@ -206,9 +219,9 @@ public class capstoneRedo2 extends Application {
         try {
 
             String query = "Select distinct experience from application";
-            conn.sendDBCommand(query);
-            while (conn.dbResults.next()) {
-                experienceList.add(conn.dbResults.getString("experience"));
+            ResultSet rsExperience = statement.executeQuery(query);
+            while (rsExperience.next()) {
+                experienceList.add(rsExperience.getString("experience"));
             }
         } catch (SQLException ex) {
         }
@@ -225,72 +238,81 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Birth Date:"), 0, 3);
         centerPane.add(labelText("Phone Number:"), 0, 4);
         centerPane.add(labelText("Email"), 0, 5);
-        centerPane.add(labelText("Address:"), 0, 6);
-        centerPane.add(labelText("Experience:"), 0, 7);
+        centerPane.add(labelText("Password"), 0, 6);
+        centerPane.add(labelText("Address:"), 0, 7);
+        centerPane.add(labelText("Experience:"), 0, 8);
 
         centerPane.add(applicationFirstName, 1, 1);
         centerPane.add(applicationLastName, 1, 2);
         centerPane.add(applicationDOB, 1, 3);
         centerPane.add(applicationPhone, 1, 4);
         centerPane.add(applicationEmail, 1, 5);
-        centerPane.add(applicationAddress, 1, 6);
-        centerPane.add(applicationExperience, 1, 7);
+        centerPane.add(applicationPassword, 1, 6);
+        centerPane.add(applicationAddress, 1, 7);
+        centerPane.add(applicationExperience, 1, 8);
         centerPane.add(applicationSubmit, 1, 10);
         applicationExperience.setItems(experienceList);
 
         applicationSubmit.setOnAction(e -> {
             String query = "Select * from application";
             try {
-                conn.sendDBCommand(query);
-                while (conn.dbResults.next()) { //get database data
-                    App dbApp = new App();
-                    dbApp.setAppID(conn.dbResults.getInt(1));
-                    dbApp.setAFirst(conn.dbResults.getString(2));
-                    dbApp.setALast(conn.dbResults.getString(3));
-                    dbApp.setDOB(conn.dbResults.getString(4));
-                    dbApp.setPhone(conn.dbResults.getString(5));
-                    dbApp.setEmail(conn.dbResults.getString(6));
-                    dbApp.setAddress(conn.dbResults.getString(7));
-                    dbApp.setExperience(conn.dbResults.getString(8));
+                try (ResultSet rsApplications = statement.executeQuery(query)) {
+                    while (rsApplications.next()) { //get database data
+                        App dbApp = new App();
+                        dbApp.setAppID(rsApplications.getInt(1));
+                        dbApp.setAFirst(rsApplications.getString(2));
+                        dbApp.setALast(rsApplications.getString(3));
+                        dbApp.setDOB(rsApplications.getString(4));
+                        dbApp.setPhone(rsApplications.getString(5));
+                        dbApp.setEmail(rsApplications.getString(6));
+                        dbApp.setPassword(rsApplications.getString(7));
+                        dbApp.setAddress(rsApplications.getString(8));
+                        dbApp.setExperience(rsApplications.getString(9));
+                    }
                 }
-                conn.dbResults.close();
             } catch (SQLException ex) {
             }
             //give error if any fields are empty
             if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
-                    || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationAddress.getText().isEmpty()
+                    || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationPassword.getText() == null
+                    || applicationAddress.getText().isEmpty()
                     || applicationExperience.getValue().isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("Please enter all data");
                 alert.showAndWait();
             } else {
-                App submittedApp = new App( //create new application 
-                        applicationFirstName.getText(),
-                        applicationLastName.getText(),
-                        applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
-                        applicationPhone.getText(),
-                        applicationEmail.getText(),
-                        applicationAddress.getText(),
-                        applicationExperience.getValue());
-                String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,address,experience) VALUES (" + submittedApp.appID + ", '"
-                        + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
-                        + applicationEmail.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
-                conn.sendDBCommand(insert);
-                String commit = "commit";
-                conn.sendDBCommand(commit);
+                try {
+                    App submittedApp = new App( //create new application
+                            applicationFirstName.getText(),
+                            applicationLastName.getText(),
+                            applicationDOB.getValue().format(DateTimeFormatter.ISO_DATE),
+                            applicationPhone.getText(),
+                            applicationEmail.getText(),
+                            applicationPassword.getText(),
+                            applicationAddress.getText(),
+                            applicationExperience.getValue());
+                    String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,password, address,experience) VALUES (" + submittedApp.appID + ", '"
+                            + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
+                            + applicationEmail.getText() + "', '" + applicationPassword.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
+                    statement.execute(insert);
+                    statement.execute("commit");
 
-                //clear text fields after submission
-                applicationFirstName.setText("");
-                applicationLastName.setText("");
-                applicationDOB.setValue(null);
-                applicationPhone.setText("");
-                applicationEmail.setText("");
-                applicationAddress.setText("");
-                applicationExperience.setValue("");
+                    //clear text fields after submission
+                    applicationFirstName.setText("");
+                    applicationLastName.setText("");
+                    applicationDOB.setValue(null);
+                    applicationPhone.setText("");
+                    applicationEmail.setText("");
+                    applicationPassword.setText("");
+                    applicationAddress.setText("");
+                    applicationExperience.setValue("");
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                alert.setHeaderText("Application Submitted!");
-                alert.showAndWait();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Application Submitted!");
+                    alert.showAndWait();
+                } catch (SQLException ex) {
+                    Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
 
@@ -349,15 +371,26 @@ public class capstoneRedo2 extends Application {
             }
         });
         reportsButton.setOnAction(e -> reports());
-        assignSpecButton.setOnAction(e -> assignSpec());
+        assignSpecButton.setOnAction(e -> {
+            try {
+                assignSpec();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
         centerPane.setVgap(8);
         pane.setCenter(centerPane);
 
     }
 
-    public void assignSpec() {
-        DBConnection conn = new DBConnection();
+    public void assignSpec() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
         refreshCenterPane(centerPane);
 
         Button assignSpecButton = new Button("Submit Specialization");
@@ -372,9 +405,9 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> volunteersList = new ComboBox<>();
         try {
             String query = "Select distinct specialization from volunteers";
-            conn.sendDBCommand(query);
-            while (conn.dbResults.next()) {
-                specializations.getItems().add(conn.dbResults.getString("specialization"));
+            ResultSet rsSpecializations = statement.executeQuery(query);
+            while (rsSpecializations.next()) {
+                specializations.getItems().add(rsSpecializations.getString("specialization"));
             }
         } catch (SQLException ex) {
         }
@@ -382,23 +415,29 @@ public class capstoneRedo2 extends Application {
             String query = "Select v.volunteerID, a.firstName, a.lastName "
                     + "from volunteers v, application a "
                     + "where a.applicationID = v.applicationID";
-            conn.sendDBCommand(query);
-            while (conn.dbResults.next()) {
-                int volID = conn.dbResults.getInt(1);
-                String firstName = conn.dbResults.getString(2); //getting first name from application table
-                String lastName = conn.dbResults.getString(3); //getting last name from application table
+            ResultSet rsVolunteers = statement.executeQuery(query);
+            while (rsVolunteers.next()) {
+                int volID = rsVolunteers.getInt(1);
+                String firstName = rsVolunteers.getString(2); //getting first name from application table
+                String lastName = rsVolunteers.getString(3); //getting last name from application table
                 String volInfo = volID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
                 volunteersList.getItems().add(volInfo); //populate combo box for volunteers????
                 assignSpecButton.setOnAction(e -> {
-                    //code to update sql database when button is clicked
-                    String selectedVolunteer = volunteersList.getSelectionModel().getSelectedItem();
-                    String[] info = selectedVolunteer.split(" ");
-                    String id = info[0];
-                    String selectedSpec = specializations.getSelectionModel().getSelectedItem();
-                    String sql = "update volunteers set specialization= '" + selectedSpec + "' "
-                            + "where volunteerID= " + id;
-                    conn.sendDBCommand(sql);
-                    
+                    try {
+                        //code to update sql database when button is clicked
+                        String selectedVolunteer = volunteersList.getSelectionModel().getSelectedItem();
+                        String[] info = selectedVolunteer.split(" ");
+                        String id = info[0];
+                        String selectedSpec = specializations.getSelectionModel().getSelectedItem();
+                        String sql = "update volunteers set specialization= '" + selectedSpec + "' "
+                                + "where volunteerID= " + id;
+                        statement.executeQuery(sql);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Specialization assigned");
+                    alert.showAndWait();
                 });
 
             }
@@ -423,13 +462,37 @@ public class capstoneRedo2 extends Application {
         ObservableList<String> Times
                 = FXCollections.observableArrayList(
                         "9:00 A.M",
+                        "9:15 A.M",
+                        "9:30 A.M",
+                        "9:45 A.M",
                         "10:00 A.M",
+                        "10:15 A.M",
+                        "10:30 A.M",
+                        "10:45 A.M",
                         "11:00 A.M",
-                        "12:00 A.M",
+                        "11:15 A.M",
+                        "11:30 A.M",
+                        "11:45 A.M",
+                        "12:00 P.M",
+                        "12:15 P.M",
+                        "12:30 P.M",
+                        "12:45 P.M",
                         "1:00 P.M",
+                        "1:15 P.M",
+                        "1:30 P.M",
+                        "1:45 P.M",
                         "2:00 P.M",
+                        "2:15 P.M",
+                        "2:30 P.M",
+                        "2:45 P.M",
                         "3:00 P.M",
+                        "3:15 P.M",
+                        "3:30 P.M",
+                        "3:45 P.M",
                         "4:00 P.M",
+                        "4:15 P.M",
+                        "4:30 P.M",
+                        "4:45 P.M",
                         "5:00 P.M"
                 );
 
@@ -437,6 +500,10 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> cboTasks = new ComboBox<>();
         ComboBox<String> cboLocation = new ComboBox<>();
         ComboBox<String> cboTimeout = new ComboBox<>(Times);
+        TextField tothours = new TextField(); 
+        Button clockin = new Button("Check in");
+        Button submithours = new Button("Check Out");
+        
 
         pane.setTop(heading("Volunteer Check " + type));
 
@@ -447,12 +514,35 @@ public class capstoneRedo2 extends Application {
             centerPane.add(cboTasks, 1, 0);
             centerPane.add(cboLocation, 1, 1);
             centerPane.add(cboTimein, 1, 2);
+            centerPane.add(clockin,0,7);
+            
+            
+         clockin.setOnAction(e -> {
+     
+         Alert userPrompt = new Alert(Alert.AlertType.NONE,
+          "You have checked in, Return to Home Screen when you wish to check out.",
+          ButtonType.OK);
+          userPrompt.show();
+            });
+            
         } else if (type.equals("Out")) {
-            centerPane.add(labelText("Event: "), 0, 0);
-            centerPane.add(labelText("Time Out: "), 0, 1);
-            centerPane.add((new ComboBox<Object>()), 1, 0);
-            centerPane.add(cboTimeout, 1, 1);
+            centerPane.add(labelText("Time Out: "), 0, 0);
+            centerPane.add(labelText("Enter total hours: "), 0, 1);
+            centerPane.add(cboTimeout, 1, 0);
+            centerPane.add(tothours, 1, 1);
+            centerPane.add(submithours, 0, 5);
+            
+            submithours.setOnAction(e -> {
+            tothours.clear();
+            
+         Alert userPrompt = new Alert(Alert.AlertType.NONE,
+          "Your hours have been logged!",
+          ButtonType.OK);
+          userPrompt.show();
+        });
+           
         }
+                    
 
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -514,7 +604,6 @@ public class capstoneRedo2 extends Application {
                 }
             });
 
-
             refreshCenterPane(centerPane);
 
             pane.setTop(heading("LOG EVENT"));
@@ -537,7 +626,7 @@ public class capstoneRedo2 extends Application {
                 TextField txtNewMileage = new TextField();
                 TextField txtNewTask = new TextField();
                 Button btnSubmitNew = new Button("Submit New Event!");
-                final ComboBox<Integer> cboMaxV = new ComboBox<Integer>();
+                final ComboBox<Integer> cboMaxV = new ComboBox<>();
                 cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
                 pane.setTop(heading("ADD NEW EVENT"));
@@ -557,25 +646,23 @@ public class capstoneRedo2 extends Application {
             });
 
             submitEvent.setOnAction((ActionEvent e) -> {
-                DBConnection conn = new DBConnection();
                 String query = "Select location, mileage from events";
                 try {
-                    conn.sendDBCommand(query);
-                    while (conn.dbResults.next()) { //get database data
-                        Event dbEvent = new Event();
-     //                   dbEvent.setEventID(conn.dbResults.getInt(1));
-                        dbEvent.setLocation(conn.dbResults.getString(1));
-                        dbEvent.setMileage(conn.dbResults.getString(2));
+                    try (ResultSet rsEvents = statement.executeQuery(query)) {
+                        while (rsEvents.next()) { //get database data
+                            Event dbEvent = new Event();
+                            //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                            dbEvent.setLocation(rsEvents.getString(1));
+                            dbEvent.setMileage(rsEvents.getString(2));
 //                    dbEvent.setTask(conn.dbResults.getString(4));
 //                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
 
+                        }
                     }
-                    conn.dbResults.close();
                 } catch (SQLException ex) {
 
-  
                 }
-        
+
 //
 //        submitEvent.setOnAction((ActionEvent e) -> {
 //            DBConnection conn = new DBConnection();
@@ -611,18 +698,13 @@ public class capstoneRedo2 extends Application {
 //
 //                //clear text fields after submission
 //                cboLocation.setValue(null);
-
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Event Logged, \n"
-                            + "Thank You For Your Help!");
-                    alert.showAndWait();
-                });
-            }
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Event Logged, \n"
+                        + "Thank You For Your Help!");
+                alert.showAndWait();
+            });
         }
-    
-            
-                    
-    
+    }
 
     public void reports() {
         refreshCenterPane(centerPane);
@@ -741,7 +823,6 @@ public class capstoneRedo2 extends Application {
                 pane.setTop(heading("Volunteer Contact Information"));
             }
 
-
             refreshCenterPane(centerPane);
 
             int records = list.size();
@@ -757,7 +838,7 @@ public class capstoneRedo2 extends Application {
             e.printStackTrace();
         }
     }
-    
+
     public static void main(String[] args) {
         launch(args);
     }
