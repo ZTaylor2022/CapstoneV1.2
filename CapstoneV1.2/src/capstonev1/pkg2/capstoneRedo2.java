@@ -664,27 +664,13 @@ public class capstoneRedo2 extends Application {
                 }
 
 //
-//        submitEvent.setOnAction((ActionEvent e) -> {
-//            DBConnection conn = new DBConnection();
-//            String query = "Select location, mileage from events";
-//            try {
-//                conn.sendDBCommand(query);
-//                while (conn.dbResults.next()) { //get database data
-//                    Event dbEvent = new Event();
-//                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
-//                    dbEvent.setLocation(conn.dbResults.getString(1));
-//                    dbEvent.setMileage(conn.dbResults.getString(2));
-////                    dbEvent.setTask(conn.dbResults.getString(4));
-////                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
-//
-//
 //                }
 //                //give error if information isn't complete
-//                if (txtMileage.getText().isEmpty()) {
-//                    Alert alert = new Alert(Alert.AlertType.ERROR);
-//                    alert.setHeaderText("Please enter all data");
-//                    alert.showAndWait();
-//                } else {
+                if (txtMileage.getText().isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please enter all data");
+                    alert.showAndWait();
+                } else {
 //                
 //                Event submittedEvent = new Event( //create new event
 //                        cboLocation.getValue(),
@@ -702,8 +688,9 @@ public class capstoneRedo2 extends Application {
                 alert.setHeaderText("Event Logged, \n"
                         + "Thank You For Your Help!");
                 alert.showAndWait();
-            });
-        }
+            }
+        });
+    }
     }
 
     public void reports() {
