@@ -52,6 +52,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javax.swing.JComboBox;
 import oracle.jdbc.pool.OracleDataSource;
+import javafx.scene.layout.TilePane;
+import javafx.scene.control.SelectionModel;
+import javafx.scene.control.TableColumn;
 
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
@@ -82,6 +85,11 @@ public class capstoneRedo2 extends Application {
             + "-fx-font-family: \"" + fontStyle + "\";";
     String reportButtonStyle = "-fx-background-color: #66CDAA; -fx-text-fill: #FFFFFF;"
             + "-fx-font-family: \"" + fontStyle + "\";";
+    
+    Button report1 = new Button("Volunteer Hours");
+    Button report2 = new Button("Event Attendance");
+    Button report3 = new Button("Volunteer \nSpecialization");
+    Button report4 = new Button("Volunteer \nContact \nInformation");
 
     public void start(Stage primaryStage) {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
@@ -92,14 +100,12 @@ public class capstoneRedo2 extends Application {
         pane.setBackground(new Background(new BackgroundFill(
                 Color.MEDIUMAQUAMARINE, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        Button report1 = new Button("Report 1");
-        Button report2 = new Button("Report 2");
-        Button report3 = new Button("Report 3");
         report1.setStyle(reportButtonStyle);
         report2.setStyle(reportButtonStyle);
         report3.setStyle(reportButtonStyle);
+        report4.setStyle(reportButtonStyle);
 
-        toolBar.getItems().addAll(report1, report2, report3);
+        toolBar.getItems().addAll(report1, report2, report3, report4);
 
         centerPane.setHgap(10.0);
 
@@ -625,17 +631,133 @@ public class capstoneRedo2 extends Application {
 
         toolBar.setOrientation(VERTICAL);
         toolBar.setBackground(new Background(new BackgroundFill(
-                Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+                Color.DARKSLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
 
         pane.setLeft(toolBar);
 
+        report1.setOnAction(e -> {
+            try {
+                reportBuilder(1);
+            } catch (Exception ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        report2.setOnAction(e -> {
+            try {
+                reportBuilder(2);
+            } catch (Exception ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        report3.setOnAction(e -> {
+            try {
+                reportBuilder(3);
+            } catch (Exception ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        report4.setOnAction(e -> {
+            try {
+                reportBuilder(4);
+            } catch (Exception ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         addBackButton();
 
-        TableView reportTV = new TableView();
-
-        pane.setCenter(reportTV);
+        pane.setCenter(subHeading("No reports displayed"));
     }
 
+    public void reportBuilder(int selection) {
+        try {
+            String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+            OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+            ds.setURL(connectionString);
+            Connection con = ds.getConnection("javauser", "javapass");
+            Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+            ObservableList<String> list = FXCollections.observableArrayList();
+
+            TilePane tilePane = new TilePane();
+            tilePane.setVgap(5);
+
+            if (selection == 1) {
+                list.clear();
+                ResultSet reportRS = statement.executeQuery("select FirstName, LastName, "
+                        + "Hours from application, volunteers where "
+                        + "application.applicationid = volunteers.applicationid order by lastname desc");
+                while (reportRS.next()) {
+                    for (int i = 0; i < 3; i++) {
+                        list.add(i, reportRS.getString(i + 1));
+                    }
+                }
+                tilePane.setPrefColumns(3);
+                tilePane.getChildren().add(subHeading("First Name"));
+                tilePane.getChildren().add(subHeading("Last Name"));
+                tilePane.getChildren().add(subHeading("Hours"));
+                pane.setTop(heading("Hours per Volunteer"));
+            }
+            if (selection == 2) {
+                list.clear();
+                ResultSet reportRS = statement.executeQuery("select * from attendance order by eventid desc");
+                while (reportRS.next()) {
+                    for (int i = 0; i < 2; i++) {
+                        list.add(i, reportRS.getString(i + 1));
+                    }
+                }
+                tilePane.setPrefColumns(2);
+                tilePane.getChildren().add(subHeading("Event ID"));
+                tilePane.getChildren().add(subHeading("Volunteer ID"));
+                pane.setTop(heading("Volunteer Attendance"));
+            }
+            if (selection == 3) {
+                list.clear();
+                ResultSet reportRS = statement.executeQuery("select volunteerid, specialization from volunteers order by volunteerid desc");
+                while (reportRS.next()) {
+                    for (int i = 0; i < 2; i++) {
+                        list.add(i, reportRS.getString(i + 1));
+                    }
+                }
+                tilePane.setPrefColumns(2);
+                tilePane.getChildren().add(subHeading("Volunteer"));
+                tilePane.getChildren().add(subHeading("Specialization"));
+                pane.setTop(heading("Volunteer Specialization"));
+            }
+            if (selection == 4) {
+                list.clear();
+                ResultSet reportRS = statement.executeQuery("select firstname, "
+                        + "lastname, phone, email from application inner join "
+                        + "volunteers on application.applicationid = volunteers.applicationid");
+                while (reportRS.next()) {
+                    for (int i = 0; i < 4; i++) {
+                        list.add(i, reportRS.getString(i + 1));
+                    }
+                }
+                tilePane.setPrefColumns(4);
+                tilePane.getChildren().add(subHeading("First Name"));
+                tilePane.getChildren().add(subHeading("Last Name"));
+                tilePane.getChildren().add(subHeading("Phone Number"));
+                tilePane.getChildren().add(subHeading("Email"));
+                pane.setTop(heading("Volunteer Contact Information"));
+            }
+
+
+            refreshCenterPane(centerPane);
+
+            int records = list.size();
+
+            for (int i = 0; i < records; i++) {
+                tilePane.getChildren().add(labelText(list.get(i)));
+            }
+
+            centerPane.add(tilePane, 0, 0);
+            pane.setCenter(centerPane);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public static void main(String[] args) {
         launch(args);
     }
