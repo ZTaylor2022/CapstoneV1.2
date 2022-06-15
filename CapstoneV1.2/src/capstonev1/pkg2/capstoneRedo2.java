@@ -458,7 +458,7 @@ public class capstoneRedo2 extends Application {
         addBackButton();
     }
 
-    public void logEvent() throws SQLException {
+     public void logEvent() throws SQLException {
 
         // maybe add a "New Locations" button
         ComboBox<String> cboLocation = new ComboBox<>();
@@ -499,7 +499,6 @@ public class capstoneRedo2 extends Application {
                 }
             });
 
-
             refreshCenterPane(centerPane);
 
             pane.setTop(heading("LOG EVENT"));
@@ -522,7 +521,7 @@ public class capstoneRedo2 extends Application {
                 TextField txtNewMileage = new TextField();
                 TextField txtNewTask = new TextField();
                 Button btnSubmitNew = new Button("Submit New Event!");
-                final ComboBox<Integer> cboMaxV = new ComboBox<Integer>();
+                final ComboBox<Integer> cboMaxV = new ComboBox<>();
                 cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
                 pane.setTop(heading("ADD NEW EVENT"));
@@ -542,47 +541,31 @@ public class capstoneRedo2 extends Application {
             });
 
             submitEvent.setOnAction((ActionEvent e) -> {
-                DBConnection conn = new DBConnection();
                 String query = "Select location, mileage from events";
                 try {
-                    conn.sendDBCommand(query);
-                    while (conn.dbResults.next()) { //get database data
-                        Event dbEvent = new Event();
-     //                   dbEvent.setEventID(conn.dbResults.getInt(1));
-                        dbEvent.setLocation(conn.dbResults.getString(1));
-                        dbEvent.setMileage(conn.dbResults.getString(2));
+                    try (ResultSet rsEvents = statement.executeQuery(query)) {
+                        while (rsEvents.next()) { //get database data
+                            Event dbEvent = new Event();
+                            //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                            dbEvent.setLocation(rsEvents.getString(1));
+                            dbEvent.setMileage(rsEvents.getString(2));
 //                    dbEvent.setTask(conn.dbResults.getString(4));
 //                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
 
+                        }
                     }
-                    conn.dbResults.close();
                 } catch (SQLException ex) {
 
-  
                 }
-        
-//
-//        submitEvent.setOnAction((ActionEvent e) -> {
-//            DBConnection conn = new DBConnection();
-//            String query = "Select location, mileage from events";
-//            try {
-//                conn.sendDBCommand(query);
-//                while (conn.dbResults.next()) { //get database data
-//                    Event dbEvent = new Event();
-//                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
-//                    dbEvent.setLocation(conn.dbResults.getString(1));
-//                    dbEvent.setMileage(conn.dbResults.getString(2));
-////                    dbEvent.setTask(conn.dbResults.getString(4));
-////                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
-//
+
 //
 //                }
 //                //give error if information isn't complete
-//                if (txtMileage.getText().isEmpty()) {
-//                    Alert alert = new Alert(Alert.AlertType.ERROR);
-//                    alert.setHeaderText("Please enter all data");
-//                    alert.showAndWait();
-//                } else {
+                if (txtMileage.getText().isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please enter all data");
+                    alert.showAndWait();
+                } else {
 //                
 //                Event submittedEvent = new Event( //create new event
 //                        cboLocation.getValue(),
@@ -596,15 +579,14 @@ public class capstoneRedo2 extends Application {
 //
 //                //clear text fields after submission
 //                cboLocation.setValue(null);
-
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Event Logged, \n"
-                            + "Thank You For Your Help!");
-                    alert.showAndWait();
-                });
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Event Logged, \n"
+                        + "Thank You For Your Help!");
+                alert.showAndWait();
             }
-        }
-    
+        });
+    }
+    }
             
                     
     
