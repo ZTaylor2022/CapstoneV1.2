@@ -92,7 +92,7 @@ public class capstoneRedo2 extends Application {
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
 
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
         welcomeModule();
 
@@ -154,7 +154,12 @@ public class capstoneRedo2 extends Application {
         });
     }
 
-    public void welcomeModule() {
+    public void welcomeModule() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
         pane.getChildren().remove(applicationBackButton);
         refreshCenterPane(centerPane);
@@ -167,7 +172,32 @@ public class capstoneRedo2 extends Application {
         loginButton.setStyle(buttonStyle);
         appButton.setStyle(buttonStyle);
 
-        loginButton.setOnAction(e -> homeScreen());
+        loginButton.setOnAction(e -> {
+            
+            try {
+                String user = userNameTF.getText();
+                String pass = passwordTF.getText();
+                ResultSet rsPass = statement.executeQuery("select a.password from application a, volunteers v "
+                        + "where a.applicationid = v.applicationid and a.email = '" + user + "'");
+                if(!rsPass.isBeforeFirst()){
+                    //System.out.println("User not found!");
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Invalid credentials");
+                alert.showAndWait();
+                }else{
+                    while(rsPass.next()){
+                        String retrievedPass = rsPass.getString("password");
+                        if(retrievedPass.equals(pass)){
+                            homeScreen();
+                        }
+                    }
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                    });
+            
+
         appButton.setOnAction(e -> {
             try {
                 applicationScreen();
@@ -230,7 +260,13 @@ public class capstoneRedo2 extends Application {
         applicationSubmit.setStyle(buttonStyle);
 
         applicationBackButton.setStyle(buttonStyle);
-        applicationBackButton.setOnAction(e -> welcomeModule());
+        applicationBackButton.setOnAction(e -> {
+            try {
+                welcomeModule();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
         centerPane.add(subHeading("Complete all Fields"), 0, 0);
         centerPane.add(labelText("First Name:"), 0, 1);
@@ -834,13 +870,21 @@ public class capstoneRedo2 extends Application {
             centerPane.add(tilePane, 0, 0);
             pane.setCenter(centerPane);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
         }
     }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void loginMethod(String user, String password) throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("emp", "emp");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
     }
 
 }
