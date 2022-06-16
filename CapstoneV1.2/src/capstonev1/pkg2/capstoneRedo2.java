@@ -877,14 +877,4 @@ public class capstoneRedo2 extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-    private void loginMethod(String user, String password) throws SQLException {
-        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-        ds.setURL(connectionString);
-        Connection con = ds.getConnection("emp", "emp");
-        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-
-    }
-
 }
