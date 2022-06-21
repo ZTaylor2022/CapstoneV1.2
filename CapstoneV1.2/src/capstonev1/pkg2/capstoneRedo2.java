@@ -91,6 +91,7 @@ public class capstoneRedo2 extends Application {
     Button report2 = new Button("Event Attendance");
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
+   
 
     public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
@@ -105,7 +106,8 @@ public class capstoneRedo2 extends Application {
         report2.setStyle(reportButtonStyle);
         report3.setStyle(reportButtonStyle);
         report4.setStyle(reportButtonStyle);
-
+        
+        
         toolBar.getItems().addAll(report1, report2, report3, report4);
 
         centerPane.setHgap(10.0);
@@ -367,6 +369,8 @@ public class capstoneRedo2 extends Application {
         Button socialButton = new Button("Social Page");
         Button logEventButton = new Button("Log Event");
         Button assignSpecButton = new Button("Assign Specialization");
+        Button volunteerApproval = new Button("Approve or Deny Volunteers");
+       
 
         volunteerCheckInButton.setStyle(buttonStyle);
         volunteerCheckOutButton.setStyle(buttonStyle);
@@ -374,6 +378,7 @@ public class capstoneRedo2 extends Application {
         socialButton.setStyle(buttonStyle);
         logEventButton.setStyle(buttonStyle);
         assignSpecButton.setStyle(buttonStyle);
+        volunteerApproval.setStyle(buttonStyle);
 
         refreshCenterPane(centerPane);
 
@@ -384,6 +389,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(socialButton, 0, 4);
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
+        centerPane.add(volunteerApproval, 0, 7);
 
         volunteerCheckInButton.setOnAction(e -> {
             try {
@@ -410,6 +416,13 @@ public class capstoneRedo2 extends Application {
         assignSpecButton.setOnAction(e -> {
             try {
                 assignSpec();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        volunteerApproval.setOnAction(e -> {
+            try {
+                volunteerApproval();
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -859,6 +872,77 @@ public class capstoneRedo2 extends Application {
 
         } catch (SQLException e) {
         }
+    }
+    
+  public void volunteerApproval() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+        refreshCenterPane(centerPane);
+
+        Button assignSpecButton = new Button("Submit");
+        assignSpecButton.setStyle(buttonStyle);
+
+        pane.setTop(heading("Approve or Deny Applicant"));
+
+        centerPane.add(subHeading("Make Selection"), 0, 0);
+        centerPane.add(labelText("Applicant"), 0, 1);
+        centerPane.add(labelText("Aproval or Denial"), 0, 2);
+        ComboBox<String> Approvals = new ComboBox<>();
+        ComboBox<String> volunteersList = new ComboBox<>();
+        try {
+            String query = "Select distinct status from volunteers";
+            ResultSet rsApprovals = statement.executeQuery(query);
+            while (rsApprovals.next()) {
+                Approvals.getItems().add(rsApprovals.getString("Status"));
+            }
+        } catch (SQLException ex) {
+        }
+        try { //trying to get the volunteers names for the volunteer combobox
+            String query = "Select v.volunteerID, a.firstName, a.lastName "
+                    + "from volunteers v, application a "
+                    + "where a.applicationID = v.applicationID";
+            ResultSet rsApplicant = statement.executeQuery(query);
+            while (rsApplicant.next()) {
+                int volID = rsApplicant.getInt(1);
+                String firstName = rsApplicant.getString(2); //getting first name from application table
+                String lastName = rsApplicant.getString(3); //getting last name from application table
+                String volInfo = volID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
+                volunteersList.getItems().add(volInfo); //populate combo box for volunteers????
+                assignSpecButton.setOnAction(e -> {
+                    try {
+                        //code to update sql database when button is clicked
+                        String selectedVolunteer = volunteersList.getSelectionModel().getSelectedItem();
+                        String[] info = selectedVolunteer.split(" ");
+                        String id = info[0];
+                        String selectedApproval = Approvals.getSelectionModel().getSelectedItem();
+                        String sql = "update volunteers set status= '" + selectedApproval + "' "
+                                + "where volunteerID= " + id;
+                        statement.executeQuery(sql);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Approval Status assigned");
+                    alert.showAndWait();
+                });
+
+            }
+        } catch (SQLException ex) {
+
+        }
+        Approvals.setEditable(true);
+        centerPane.add(volunteersList, 1, 1);
+        centerPane.add(Approvals, 1, 2);
+        centerPane.add(assignSpecButton, 1, 3);
+
+        addBackButton();
+
+        pane.setCenter(centerPane);
+
     }
 
     public static void main(String[] args) {
