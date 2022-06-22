@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,6 +37,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
@@ -56,6 +58,8 @@ import oracle.jdbc.pool.OracleDataSource;
 import javafx.scene.layout.TilePane;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.util.Callback;
 
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
@@ -173,21 +177,21 @@ public class capstoneRedo2 extends Application {
         appButton.setStyle(buttonStyle);
 
         loginButton.setOnAction(e -> {
-            
+
             try {
                 String user = userNameTF.getText();
                 String pass = passwordTF.getText();
                 ResultSet rsPass = statement.executeQuery("select a.password from application a, volunteers v "
                         + "where a.applicationid = v.applicationid and a.email = '" + user + "'");
-                if(!rsPass.isBeforeFirst()){
+                if (!rsPass.isBeforeFirst()) {
                     //System.out.println("User not found!");
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Invalid credentials");
-                alert.showAndWait();
-                }else{
-                    while(rsPass.next()){
+                    alert.setHeaderText("Invalid credentials");
+                    alert.showAndWait();
+                } else {
+                    while (rsPass.next()) {
                         String retrievedPass = rsPass.getString("password");
-                        if(retrievedPass.equals(pass)){
+                        if (retrievedPass.equals(pass)) {
                             homeScreen();
                         }
                     }
@@ -195,8 +199,7 @@ public class capstoneRedo2 extends Application {
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
-                    });
-            
+        });
 
         appButton.setOnAction(e -> {
             try {
@@ -289,25 +292,26 @@ public class capstoneRedo2 extends Application {
         centerPane.add(applicationSubmit, 1, 10);
         applicationExperience.setItems(experienceList);
 
-        applicationSubmit.setOnAction(e -> {
-            String query = "Select * from application";
-            try {
-                try (ResultSet rsApplications = statement.executeQuery(query)) {
-                    while (rsApplications.next()) { //get database data
-                        App dbApp = new App();
-                        dbApp.setAppID(rsApplications.getInt(1));
-                        dbApp.setAFirst(rsApplications.getString(2));
-                        dbApp.setALast(rsApplications.getString(3));
-                        dbApp.setDOB(rsApplications.getString(4));
-                        dbApp.setPhone(rsApplications.getString(5));
-                        dbApp.setEmail(rsApplications.getString(6));
-                        dbApp.setPassword(rsApplications.getString(7));
-                        dbApp.setAddress(rsApplications.getString(8));
-                        dbApp.setExperience(rsApplications.getString(9));
-                    }
+        String query = "Select * from application";
+        try {
+            try (ResultSet rsApplications = statement.executeQuery(query)) {
+                while (rsApplications.next()) { //get database data
+                    App dbApp = new App();
+                    dbApp.setAppID(rsApplications.getInt(1));
+                    dbApp.setAFirst(rsApplications.getString(2));
+                    dbApp.setALast(rsApplications.getString(3));
+                    dbApp.setDOB(rsApplications.getString(4));
+                    dbApp.setPhone(rsApplications.getString(5));
+                    dbApp.setEmail(rsApplications.getString(6));
+                    dbApp.setPassword(rsApplications.getString(7));
+                    dbApp.setAddress(rsApplications.getString(8));
+                    dbApp.setExperience(rsApplications.getString(9));
                 }
-            } catch (SQLException ex) {
             }
+        } catch (SQLException ex) {
+        }
+        applicationSubmit.setOnAction(e -> {
+
             //give error if any fields are empty
             if (applicationFirstName.getText().isEmpty() || applicationLastName.getText().isEmpty() || applicationDOB.getValue() == null
                     || applicationPhone.getText().isEmpty() || applicationEmail.getText().isEmpty() || applicationPassword.getText() == null
@@ -326,10 +330,12 @@ public class capstoneRedo2 extends Application {
                             applicationEmail.getText(),
                             applicationPassword.getText(),
                             applicationAddress.getText(),
-                            applicationExperience.getValue());
-                    String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,password, address,experience) VALUES (" + submittedApp.appID + ", '"
+                            applicationExperience.getValue()
+                    );
+                    String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,password, address,experience,status) VALUES (" + submittedApp.appID + ", '"
                             + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
-                            + applicationEmail.getText() + "', '" + applicationPassword.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "')";
+                            + applicationEmail.getText() + "', '" + applicationPassword.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "', '"
+                            + "')";
                     statement.execute(insert);
                     statement.execute("commit");
 
@@ -367,6 +373,7 @@ public class capstoneRedo2 extends Application {
         Button socialButton = new Button("Social Page");
         Button logEventButton = new Button("Log Event");
         Button assignSpecButton = new Button("Assign Specialization");
+        Button volunteerApproval = new Button("Approve or Deny Applications");
 
         volunteerCheckInButton.setStyle(buttonStyle);
         volunteerCheckOutButton.setStyle(buttonStyle);
@@ -374,6 +381,7 @@ public class capstoneRedo2 extends Application {
         socialButton.setStyle(buttonStyle);
         logEventButton.setStyle(buttonStyle);
         assignSpecButton.setStyle(buttonStyle);
+        volunteerApproval.setStyle(buttonStyle);
 
         refreshCenterPane(centerPane);
 
@@ -384,6 +392,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(socialButton, 0, 4);
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
+        centerPane.add(volunteerApproval, 0, 7);
 
         volunteerCheckInButton.setOnAction(e -> {
             try {
@@ -413,6 +422,13 @@ public class capstoneRedo2 extends Application {
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
+        });
+        volunteerApproval.setOnAction(e -> {
+//            try {
+//                volunteerApproval();
+//            } catch (SQLException ex) {
+//                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+//            }
         });
 
         centerPane.setVgap(8);
@@ -536,10 +552,9 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> cboTasks = new ComboBox<>();
         ComboBox<String> cboLocation = new ComboBox<>();
         ComboBox<String> cboTimeout = new ComboBox<>(Times);
-        TextField tothours = new TextField(); 
+        TextField tothours = new TextField();
         Button clockin = new Button("Check in");
         Button submithours = new Button("Check Out");
-        
 
         pane.setTop(heading("Volunteer Check " + type));
 
@@ -550,35 +565,33 @@ public class capstoneRedo2 extends Application {
             centerPane.add(cboTasks, 1, 0);
             centerPane.add(cboLocation, 1, 1);
             centerPane.add(cboTimein, 1, 2);
-            centerPane.add(clockin,0,7);
-            
-            
-         clockin.setOnAction(e -> {
-     
-         Alert userPrompt = new Alert(Alert.AlertType.NONE,
-          "You have checked in, Return to Home Screen when you wish to check out.",
-          ButtonType.OK);
-          userPrompt.show();
+            centerPane.add(clockin, 0, 7);
+
+            clockin.setOnAction(e -> {
+
+                Alert userPrompt = new Alert(Alert.AlertType.NONE,
+                        "You have checked in, Return to Home Screen when you wish to check out.",
+                        ButtonType.OK);
+                userPrompt.show();
             });
-            
+
         } else if (type.equals("Out")) {
             centerPane.add(labelText("Time Out: "), 0, 0);
             centerPane.add(labelText("Enter total hours: "), 0, 1);
             centerPane.add(cboTimeout, 1, 0);
             centerPane.add(tothours, 1, 1);
             centerPane.add(submithours, 0, 5);
-            
+
             submithours.setOnAction(e -> {
-            tothours.clear();
-            
-         Alert userPrompt = new Alert(Alert.AlertType.NONE,
-          "Your hours have been logged!",
-          ButtonType.OK);
-          userPrompt.show();
-        });
-           
+                tothours.clear();
+
+                Alert userPrompt = new Alert(Alert.AlertType.NONE,
+                        "Your hours have been logged!",
+                        ButtonType.OK);
+                userPrompt.show();
+            });
+
         }
-                    
 
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -700,13 +713,27 @@ public class capstoneRedo2 extends Application {
                 }
 
 //
+//        submitEvent.setOnAction((ActionEvent e) -> {
+//            DBConnection conn = new DBConnection();
+//            String query = "Select location, mileage from events";
+//            try {
+//                conn.sendDBCommand(query);
+//                while (conn.dbResults.next()) { //get database data
+//                    Event dbEvent = new Event();
+//                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+//                    dbEvent.setLocation(conn.dbResults.getString(1));
+//                    dbEvent.setMileage(conn.dbResults.getString(2));
+////                    dbEvent.setTask(conn.dbResults.getString(4));
+////                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
+//
+//
 //                }
 //                //give error if information isn't complete
-                if (txtMileage.getText().isEmpty()) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setHeaderText("Please enter all data");
-                    alert.showAndWait();
-                } else {
+//                if (txtMileage.getText().isEmpty()) {
+//                    Alert alert = new Alert(Alert.AlertType.ERROR);
+//                    alert.setHeaderText("Please enter all data");
+//                    alert.showAndWait();
+//                } else {
 //                
 //                Event submittedEvent = new Event( //create new event
 //                        cboLocation.getValue(),
@@ -724,9 +751,8 @@ public class capstoneRedo2 extends Application {
                 alert.setHeaderText("Event Logged, \n"
                         + "Thank You For Your Help!");
                 alert.showAndWait();
-            }
-        });
-    }
+            });
+        }
     }
 
     public void reports() {
@@ -860,6 +886,8 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException e) {
         }
     }
+
+    
 
     public static void main(String[] args) {
         launch(args);
