@@ -59,6 +59,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
 //import oracle.jdbc.pool.OracleDataSource;
@@ -424,11 +425,11 @@ public class capstoneRedo2 extends Application {
             }
         });
         volunteerApproval.setOnAction(e -> {
-//            try {
-//                volunteerApproval();
-//            } catch (SQLException ex) {
-//                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+            try {
+                volunteerApproval();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
 
         centerPane.setVgap(8);
@@ -887,7 +888,93 @@ public class capstoneRedo2 extends Application {
         }
     }
 
-    
+    public void volunteerApproval() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+        refreshCenterPane(centerPane);
+
+        Button submitButton = new Button("Submit");
+        submitButton.setStyle(buttonStyle);
+        ObservableList status = FXCollections.observableArrayList("Approved", "Denied");
+        ObservableList<ObservableList> data = FXCollections.observableArrayList();
+        TableView tableView = new TableView();
+        ComboBox<String> statusCB = new ComboBox<>();
+        ComboBox<String> appList = new ComboBox<>();
+        statusCB.setItems(status);
+
+        pane.setTop(heading("Approve or Deny Applicant"));
+        //Label lblSelection = new Label("Make Selection");
+        Label lblApplicant = new Label("Applicant \t");
+        Label lblStatus = new Label("Approve or Deny \t");
+
+        HBox hbox1 = new HBox();
+        hbox1.getChildren().addAll(lblApplicant, appList);
+
+        HBox hbox2 = new HBox();
+        hbox2.getChildren().addAll(lblStatus, statusCB);
+
+        try { //trying to get the volunteers names for the volunteer combobox
+            String query = "Select applicationid, firstName, lastName, phone, email, experience, status"
+                    + " from application a ";
+            ResultSet rs = statement.executeQuery(query);
+            //while(rs.next()){
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                //We are using non property style for making dynamic table
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
+                    @Override
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
+                tableView.getColumns().addAll(col);
+            }
+            // ResultSet rsApplicant = statement.executeQuery(query);
+            while (rs.next()) {
+                int appID = rs.getInt(1);
+                String firstName = rs.getString(2); //getting first name from application table
+                String lastName = rs.getString(3); //getting last name from application table
+                String appInfo = appID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
+                appList.getItems().add(appInfo); //populate combo box for volunteers????
+                submitButton.setOnAction(e -> {
+                    try {
+//                        //code to update sql database when button is clicked
+                        String selectedVolunteer = appList.getSelectionModel().getSelectedItem();
+                        String[] info = selectedVolunteer.split(" ");
+                        String id = info[0];
+                        String selectedApproval = statusCB.getSelectionModel().getSelectedItem();
+                        String sql = "update application set status= '" + selectedApproval + "' "
+                                + "where applicationID= " + id;
+                        statement.executeQuery(sql);
+                    } catch (SQLException ex) {
+                    }
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Application Status Updated");
+                    alert.showAndWait();
+                });
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+            }
+            tableView.setItems(data);
+
+        } catch (SQLException ex) {
+
+        }
+        centerPane.add(hbox1, 0, 1);
+        centerPane.add(hbox2, 0, 2);
+        centerPane.add(submitButton, 0, 4);
+        centerPane.add(tableView, 0, 5);
+        addBackButton();
+        pane.setCenter(centerPane);
+    }
 
     public static void main(String[] args) {
         launch(args);

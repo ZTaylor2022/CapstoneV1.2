@@ -13,7 +13,7 @@ public class App {
 
     //Data fields
     public int appID;
-    public String aFirst, aLast, dob, email, password, phone, address, experience;
+    public String aFirst, aLast, dob, email, password, phone, address, experience, status;
     static public int appCount = 200;
     public static App[] apps = new App[1000];
 
@@ -27,6 +27,7 @@ public class App {
         this.phone = null;
         this.address = null;
         this.experience = null;
+        this.status = "Pending";
         appCount++;
     }
 
@@ -41,6 +42,7 @@ public class App {
         this.phone = phone;
         this.address = address;
         this.experience = experience;
+        this.status = "";
         appCount++;
     }
 
@@ -79,6 +81,9 @@ public class App {
     public String getExperience() {
         return experience;
     }
+    public String getStatus(){
+        return status;
+    }
 
     //SETTERS
     public void setAppID(int appID) {
@@ -115,6 +120,9 @@ public class App {
 
     public void setExperience(String exp) {
         this.experience = exp;
+    }
+    public void setStatus(String stat){
+        this.status = stat;
     }
   public boolean isUserValid(String x){
         boolean emailCheck = false;
