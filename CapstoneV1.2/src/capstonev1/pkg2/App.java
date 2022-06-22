@@ -27,7 +27,7 @@ public class App {
         this.phone = null;
         this.address = null;
         this.experience = null;
-        this.status = "Pending";
+        this.status = null;
         appCount++;
     }
 
@@ -42,7 +42,7 @@ public class App {
         this.phone = phone;
         this.address = address;
         this.experience = experience;
-        this.status = "";
+        this.status = "Pending";
         appCount++;
     }
 

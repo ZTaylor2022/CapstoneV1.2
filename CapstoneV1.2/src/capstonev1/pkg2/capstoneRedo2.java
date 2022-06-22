@@ -182,18 +182,22 @@ public class capstoneRedo2 extends Application {
             try {
                 String user = userNameTF.getText();
                 String pass = passwordTF.getText();
-                ResultSet rsPass = statement.executeQuery("select a.password from application a, volunteers v "
+                ResultSet rs = statement.executeQuery("select a.password from application a, volunteers v "
                         + "where a.applicationid = v.applicationid and a.email = '" + user + "'");
-                if (!rsPass.isBeforeFirst()) {
+                if (!rs.isBeforeFirst()) {
                     //System.out.println("User not found!");
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setHeaderText("Invalid credentials");
                     alert.showAndWait();
                 } else {
-                    while (rsPass.next()) {
-                        String retrievedPass = rsPass.getString("password");
+                    while (rs.next()) {
+                        String retrievedPass = rs.getString("password");
                         if (retrievedPass.equals(pass)) {
                             homeScreen();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setHeaderText("Invalid credentials");
+                            alert.showAndWait();
                         }
                     }
                 }
@@ -336,7 +340,7 @@ public class capstoneRedo2 extends Application {
                     String insert = "INSERT INTO APPLICATION (ApplicationID,FirstName,LastName,DOB,phone,email,password, address,experience,status) VALUES (" + submittedApp.appID + ", '"
                             + applicationFirstName.getText() + "', '" + applicationLastName.getText() + "', TO_DATE('" + applicationDOB.getValue() + "','yyyy-mm-dd'), '" + applicationPhone.getText() + "', '"
                             + applicationEmail.getText() + "', '" + applicationPassword.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "', '"
-                            + "')";
+                            + submittedApp.getStatus() + "')";
                     statement.execute(insert);
                     statement.execute("commit");
 
@@ -943,17 +947,22 @@ public class capstoneRedo2 extends Application {
                 appList.getItems().add(appInfo); //populate combo box for volunteers????
                 submitButton.setOnAction(e -> {
                     try {
-//                        //code to update sql database when button is clicked
-                        String selectedVolunteer = appList.getSelectionModel().getSelectedItem();
-                        String[] info = selectedVolunteer.split(" ");
+//                        //code to update the application status when button is clicked
+                        String selected = appList.getSelectionModel().getSelectedItem();
+                        String[] info = selected.split(" ");
                         String id = info[0];
                         String selectedApproval = statusCB.getSelectionModel().getSelectedItem();
                         String sql = "update application set status= '" + selectedApproval + "' "
                                 + "where applicationID= " + id;
                         statement.executeQuery(sql);
+
+                        if (selected.equals("Approved")) {
+                            //THIS IS WHERE I'M STUCK LOL
+                            //Need to create a new volunteer when the status of an application goes from pending to approved.
+                        }
                     } catch (SQLException ex) {
                     }
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setHeaderText("Application Status Updated");
                     alert.showAndWait();
                 });

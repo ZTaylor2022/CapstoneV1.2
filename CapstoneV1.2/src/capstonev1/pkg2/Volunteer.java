@@ -11,7 +11,7 @@ package capstonev1.pkg2;
  */
 public class Volunteer {
     public int volunteerID;
-    public String title,specialization,status;
+    public String title,specialization;
     public double hours;
     public int appID;
     public final static int MAXVOLUNTEERS = 500;
@@ -21,15 +21,13 @@ public class Volunteer {
         this.volunteerID = 0;
         this.title = null;
         this.specialization = null;
-        this.status = null;
         this.hours = 0.0;
     }
     
-     public Volunteer(int vID,String t,String spec,String stat,double hour,int aID){
+     public Volunteer(int vID,String t,String spec,double hour,int aID){
         this.volunteerID = vID;
         this.title = t;
         this.specialization = spec;
-        this.status = stat;
         this.hours = hour;
         this.appID = aID;
         
@@ -43,9 +41,6 @@ public class Volunteer {
     }
     public String getSpecialization(){
         return specialization;
-    }
-    public String getStatus(){
-        return status;
     }
     public double getHours(){
         return hours;
@@ -62,9 +57,6 @@ public class Volunteer {
     }
     public void setSpecialization(String l){
         this.specialization = l;
-    }
-    public void setStatus(String e){
-        this.status = e;
     }
     public void setHours(double p){
         this.hours = p;
