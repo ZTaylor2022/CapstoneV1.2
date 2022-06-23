@@ -14,24 +14,27 @@ public class Volunteer {
     public String title,specialization;
     public double hours;
     public int appID;
+    static public int volunteerCount = 1;
     public final static int MAXVOLUNTEERS = 500;
     public static Volunteer[] volunteers = new Volunteer[MAXVOLUNTEERS];
     
     public Volunteer(){
-        this.volunteerID = 0;
+        this.volunteerID = volunteerCount;
         this.title = null;
         this.specialization = null;
         this.hours = 0.0;
+        this.appID = 0;
+        volunteerCount++;
     }
     
-     public Volunteer(int vID,String t,String spec,double hour,int aID){
-        this.volunteerID = vID;
+     public Volunteer(String t,String spec,double hour,int aID){
+        this.volunteerID = volunteerCount;
         this.title = t;
         this.specialization = spec;
         this.hours = hour;
         this.appID = aID;
-        
-    }
+        volunteerCount++;
+        }
      //GETTERS
     public int getVolunteerID(){
         return volunteerID;
@@ -64,5 +67,8 @@ public class Volunteer {
     public void setAppID(int a){
         this.appID = a;
     }
-    
+    @Override
+    public String toString(){
+        return this.volunteerID + " " + this.title + " " + this.specialization + " " + this.hours + " " + this.appID;
+    }
 }

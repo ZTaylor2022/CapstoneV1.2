@@ -124,33 +124,10 @@ public class App {
     public void setStatus(String stat){
         this.status = stat;
     }
-  public boolean isUserValid(String x){
-        boolean emailCheck = false;
-        int i = 0;
-        for(i=0;i<apps.length;i++){
-            if (apps[i].email != x){
-                i++;
-            }
-            else{
-                emailCheck = true;
-            }
-            
-        }
-        return emailCheck;
-    }
-    public boolean isPasswordValid(String y){
-        boolean passwordCheck = false;
-        int i = 0;
-        for(i=0;i<apps.length;i++){
-            if (apps[i].password != y){
-                i++;
-            }
-            else{
-                passwordCheck = true;
-            }
-            
-        }
-        return passwordCheck;
-    }
+    @Override
+  public String toString(){
+      return this.appID + " " + this.aFirst + " " + this.aLast + "  " + this.dob + " " + this.phone + " "
+              + this.email + " " + this.password + " " + this.address + " " + this.experience + " " + this.status;
+   }
 }
 

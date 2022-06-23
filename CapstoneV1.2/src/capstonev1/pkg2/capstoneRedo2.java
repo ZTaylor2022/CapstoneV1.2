@@ -378,7 +378,7 @@ public class capstoneRedo2 extends Application {
         Button socialButton = new Button("Social Page");
         Button logEventButton = new Button("Log Event");
         Button assignSpecButton = new Button("Assign Specialization");
-        Button volunteerApproval = new Button("Approve or Deny Applications");
+        Button applicationApproval = new Button("View Pending Applications");
 
         volunteerCheckInButton.setStyle(buttonStyle);
         volunteerCheckOutButton.setStyle(buttonStyle);
@@ -386,7 +386,7 @@ public class capstoneRedo2 extends Application {
         socialButton.setStyle(buttonStyle);
         logEventButton.setStyle(buttonStyle);
         assignSpecButton.setStyle(buttonStyle);
-        volunteerApproval.setStyle(buttonStyle);
+        applicationApproval.setStyle(buttonStyle);
 
         refreshCenterPane(centerPane);
 
@@ -397,7 +397,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(socialButton, 0, 4);
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
-        centerPane.add(volunteerApproval, 0, 7);
+        centerPane.add(applicationApproval, 0, 7);
 
         volunteerCheckInButton.setOnAction(e -> {
             try {
@@ -428,9 +428,9 @@ public class capstoneRedo2 extends Application {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        volunteerApproval.setOnAction(e -> {
+        applicationApproval.setOnAction(e -> {
             try {
-                volunteerApproval();
+                applicationApproval();
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -892,7 +892,7 @@ public class capstoneRedo2 extends Application {
         }
     }
 
-    public void volunteerApproval() throws SQLException {
+    public void applicationApproval() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
         ds.setURL(connectionString);
@@ -901,8 +901,8 @@ public class capstoneRedo2 extends Application {
 
         refreshCenterPane(centerPane);
 
-        Button submitButton = new Button("Submit");
-        submitButton.setStyle(buttonStyle);
+        Button saveButton = new Button("Save");
+        saveButton.setStyle(buttonStyle);
         ObservableList status = FXCollections.observableArrayList("Approved", "Denied");
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         TableView tableView = new TableView();
@@ -910,7 +910,7 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> appList = new ComboBox<>();
         statusCB.setItems(status);
 
-        pane.setTop(heading("Approve or Deny Applicant"));
+        pane.setTop(heading("Approve or Deny Applications"));
         //Label lblSelection = new Label("Make Selection");
         Label lblApplicant = new Label("Applicant \t");
         Label lblStatus = new Label("Approve or Deny \t");
@@ -920,14 +920,25 @@ public class capstoneRedo2 extends Application {
 
         HBox hbox2 = new HBox();
         hbox2.getChildren().addAll(lblStatus, statusCB);
-
-        try { //trying to get the volunteers names for the volunteer combobox
+        
+        String selectSql = "select * from volunteers";
+        try (ResultSet rsVolunteers = statement.executeQuery(selectSql)){ //get all volunteers from db table
+            while (rsVolunteers.next()){
+                Volunteer dbVolunteer = new Volunteer();
+                dbVolunteer.setVolunteerID(rsVolunteers.getInt(1));
+                dbVolunteer.setTitle(rsVolunteers.getString(2));
+                dbVolunteer.setSpecialization(rsVolunteers.getString(3));
+                dbVolunteer.setHours(rsVolunteers.getDouble(4));
+                dbVolunteer.setAppID(rsVolunteers.getInt(5));
+        }
+        }catch (SQLException ex){
+        }
+        try { //trying to get the applicant names for the application combobox
             String query = "Select applicationid, firstName, lastName, phone, email, experience, status"
-                    + " from application a ";
+                    + " from application a"
+                    + " where status = 'Pending'";
             ResultSet rs = statement.executeQuery(query);
-            //while(rs.next()){
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
-                //We are using non property style for making dynamic table
                 final int j = i;
                 TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
                 col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
@@ -938,34 +949,42 @@ public class capstoneRedo2 extends Application {
                 });
                 tableView.getColumns().addAll(col);
             }
-            // ResultSet rsApplicant = statement.executeQuery(query);
             while (rs.next()) {
                 int appID = rs.getInt(1);
                 String firstName = rs.getString(2); //getting first name from application table
                 String lastName = rs.getString(3); //getting last name from application table
                 String appInfo = appID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
-                appList.getItems().add(appInfo); //populate combo box for volunteers????
-                submitButton.setOnAction(e -> {
+                appList.getItems().add(appInfo); //populate combo box for applications
+                saveButton.setOnAction(e -> { //when save button is clicked
                     try {
 //                        //code to update the application status when button is clicked
-                        String selected = appList.getSelectionModel().getSelectedItem();
-                        String[] info = selected.split(" ");
+                        String selectedAppliation = appList.getSelectionModel().getSelectedItem();
+                        String[] info = selectedAppliation.split(" ");
                         String id = info[0];
-                        String selectedApproval = statusCB.getSelectionModel().getSelectedItem();
-                        String sql = "update application set status= '" + selectedApproval + "' "
+                        String selectedDecision = statusCB.getSelectionModel().getSelectedItem();
+                        String sql = "update application set status= '" + selectedDecision + "' "
                                 + "where applicationID= " + id;
                         statement.executeQuery(sql);
-
-                        if (selected.equals("Approved")) {
-                            //THIS IS WHERE I'M STUCK LOL
-                            //Need to create a new volunteer when the status of an application goes from pending to approved.
+                        if (selectedDecision.equals("Approved")) { //if the application status is changed to approved
+                            //Create new volunteer object
+                            Volunteer newVolunteer = new Volunteer("Volunteer in Training", "None", 0.0, Integer.valueOf(id));
+                           // System.out.println(newVolunteer);
+                            String sqlQuery = "insert into volunteers (volunteerid, title, specialization, hours, applicationid)"
+                                    + " values (" + newVolunteer.volunteerID + ", '" + newVolunteer.title + "', '"
+                                    + newVolunteer.specialization + "', " + newVolunteer.hours + ", " + newVolunteer.appID + ")";
+                            statement.executeQuery(sqlQuery);
+                            statement.executeQuery("commit");
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setHeaderText("Application Accepted");
+                            alert.showAndWait();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setHeaderText("Application Denied");
+                            alert.showAndWait();
                         }
                     } catch (SQLException ex) {
                     }
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setHeaderText("Application Status Updated");
-                    alert.showAndWait();
-                });
+                }); //getting the db data into the table view
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
                     row.add(rs.getString(i));
@@ -973,13 +992,11 @@ public class capstoneRedo2 extends Application {
                 data.add(row);
             }
             tableView.setItems(data);
-
         } catch (SQLException ex) {
-
         }
         centerPane.add(hbox1, 0, 1);
         centerPane.add(hbox2, 0, 2);
-        centerPane.add(submitButton, 0, 4);
+        centerPane.add(saveButton, 0, 4);
         centerPane.add(tableView, 0, 5);
         addBackButton();
         pane.setCenter(centerPane);
