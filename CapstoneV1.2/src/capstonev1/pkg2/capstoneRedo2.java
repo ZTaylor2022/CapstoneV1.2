@@ -84,6 +84,7 @@ public class capstoneRedo2 extends Application {
     Button backButton = new Button("Home Screen");
     ToolBar toolBar = new ToolBar();
     Button applicationBackButton = new Button("Back");
+    Button logEventBackButton = new Button("Back");
 
     String fontStyle = "garamond";
 
@@ -159,6 +160,19 @@ public class capstoneRedo2 extends Application {
         });
     }
 
+    private void addlogEventBackButton() {
+        logEventBackButton.setStyle(buttonStyle);
+        logEventBackButton.setOnAction(e -> {
+          try {
+                logEvent();
+
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+    }
+
     public void welcomeModule() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -198,19 +212,23 @@ public class capstoneRedo2 extends Application {
                             Alert alert = new Alert(Alert.AlertType.ERROR);
                             alert.setHeaderText("Invalid credentials");
                             alert.showAndWait();
+
                         }
                     }
                 }
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
         appButton.setOnAction(e -> {
             try {
                 applicationScreen();
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -271,8 +289,10 @@ public class capstoneRedo2 extends Application {
         applicationBackButton.setOnAction(e -> {
             try {
                 welcomeModule();
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -357,8 +377,10 @@ public class capstoneRedo2 extends Application {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
                     alert.setHeaderText("Application Submitted!");
                     alert.showAndWait();
+
                 } catch (SQLException ex) {
-                    Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(capstoneRedo2.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -402,37 +424,47 @@ public class capstoneRedo2 extends Application {
         volunteerCheckInButton.setOnAction(e -> {
             try {
                 volunteerCheckIO("In");
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         volunteerCheckOutButton.setOnAction(e -> {
             try {
                 volunteerCheckIO("Out");
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         logEventButton.setOnAction(e -> {
             try {
                 logEvent();
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         reportsButton.setOnAction(e -> reports());
         assignSpecButton.setOnAction(e -> {
             try {
                 assignSpec();
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         applicationApproval.setOnAction(e -> {
             try {
                 applicationApproval();
+
             } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
 
@@ -489,8 +521,10 @@ public class capstoneRedo2 extends Application {
                         String sql = "update volunteers set specialization= '" + selectedSpec + "' "
                                 + "where volunteerID= " + id;
                         statement.executeQuery(sql);
+
                     } catch (SQLException ex) {
-                        Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(capstoneRedo2.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
                     alert.setHeaderText("Specialization assigned");
@@ -619,7 +653,6 @@ public class capstoneRedo2 extends Application {
 
     public void logEvent() throws SQLException {
 
-        // maybe add a "New Locations" button
         ComboBox<String> cboLocation = new ComboBox<>();
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -640,7 +673,7 @@ public class capstoneRedo2 extends Application {
                 public void changed(ObservableValue ov, Object t, Object t1) {
                     switch (t1.toString()) {
                         case "Charlottesville":
-                            txtMileage.setText("62"); // also try and populate miles txtField from db
+                            txtMileage.setText("62");
                             break;
                         case "Luray":
                             txtMileage.setText("33");
@@ -680,6 +713,8 @@ public class capstoneRedo2 extends Application {
                 TextField txtNewMileage = new TextField();
                 TextField txtNewTask = new TextField();
                 Button btnSubmitNew = new Button("Submit New Event!");
+                logEventBackButton.setStyle(buttonStyle);
+
                 final ComboBox<Integer> cboMaxV = new ComboBox<>();
                 cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
@@ -694,9 +729,8 @@ public class capstoneRedo2 extends Application {
                 centerPane.add(cboMaxV, 1, 3);
                 centerPane.add(btnSubmitNew, 0, 4);
                 btnSubmitNew.setStyle(buttonStyle);
-
-                addBackButton(); // can add previous button to get back to existing locations
-
+                addlogEventBackButton();
+                addBackButton();
             });
 
             submitEvent.setOnAction((ActionEvent e) -> {
@@ -774,29 +808,37 @@ public class capstoneRedo2 extends Application {
         report1.setOnAction(e -> {
             try {
                 reportBuilder(1);
+
             } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         report2.setOnAction(e -> {
             try {
                 reportBuilder(2);
+
             } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         report3.setOnAction(e -> {
             try {
                 reportBuilder(3);
+
             } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         report4.setOnAction(e -> {
             try {
                 reportBuilder(4);
+
             } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
         addBackButton();
@@ -920,18 +962,18 @@ public class capstoneRedo2 extends Application {
 
         HBox hbox2 = new HBox();
         hbox2.getChildren().addAll(lblStatus, statusCB);
-        
+
         String selectSql = "select * from volunteers";
-        try (ResultSet rsVolunteers = statement.executeQuery(selectSql)){ //get all volunteers from db table
-            while (rsVolunteers.next()){
+        try (ResultSet rsVolunteers = statement.executeQuery(selectSql)) { //get all volunteers from db table
+            while (rsVolunteers.next()) {
                 Volunteer dbVolunteer = new Volunteer();
                 dbVolunteer.setVolunteerID(rsVolunteers.getInt(1));
                 dbVolunteer.setTitle(rsVolunteers.getString(2));
                 dbVolunteer.setSpecialization(rsVolunteers.getString(3));
                 dbVolunteer.setHours(rsVolunteers.getDouble(4));
                 dbVolunteer.setAppID(rsVolunteers.getInt(5));
-        }
-        }catch (SQLException ex){
+            }
+        } catch (SQLException ex) {
         }
         try { //trying to get the applicant names for the application combobox
             String query = "Select applicationid, firstName, lastName, phone, email, experience, status"
@@ -968,7 +1010,7 @@ public class capstoneRedo2 extends Application {
                         if (selectedDecision.equals("Approved")) { //if the application status is changed to approved
                             //Create new volunteer object
                             Volunteer newVolunteer = new Volunteer("Volunteer in Training", "None", 0.0, Integer.valueOf(id));
-                           // System.out.println(newVolunteer);
+                            // System.out.println(newVolunteer);
                             String sqlQuery = "insert into volunteers (volunteerid, title, specialization, hours, applicationid)"
                                     + " values (" + newVolunteer.volunteerID + ", '" + newVolunteer.title + "', '"
                                     + newVolunteer.specialization + "', " + newVolunteer.hours + ", " + newVolunteer.appID + ")";
