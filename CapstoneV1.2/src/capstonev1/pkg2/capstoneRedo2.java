@@ -161,9 +161,10 @@ public class capstoneRedo2 extends Application {
     }
 
     private void addlogEventBackButton() {
+        BorderPane.setMargin(logEventBackButton, new Insets(0));
         logEventBackButton.setStyle(buttonStyle);
         logEventBackButton.setOnAction(e -> {
-          try {
+            try {
                 logEvent();
 
             } catch (SQLException ex) {
@@ -401,6 +402,7 @@ public class capstoneRedo2 extends Application {
         Button logEventButton = new Button("Log Event");
         Button assignSpecButton = new Button("Assign Specialization");
         Button applicationApproval = new Button("View Pending Applications");
+        Button btnAnimals = new Button("View Animals");
 
         volunteerCheckInButton.setStyle(buttonStyle);
         volunteerCheckOutButton.setStyle(buttonStyle);
@@ -409,6 +411,7 @@ public class capstoneRedo2 extends Application {
         logEventButton.setStyle(buttonStyle);
         assignSpecButton.setStyle(buttonStyle);
         applicationApproval.setStyle(buttonStyle);
+        btnAnimals.setStyle(buttonStyle);
 
         refreshCenterPane(centerPane);
 
@@ -420,6 +423,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(logEventButton, 0, 5);
         centerPane.add(assignSpecButton, 0, 6);
         centerPane.add(applicationApproval, 0, 7);
+        centerPane.add(btnAnimals, 0, 8);
 
         volunteerCheckInButton.setOnAction(e -> {
             try {
@@ -462,6 +466,16 @@ public class capstoneRedo2 extends Application {
             try {
                 applicationApproval();
 
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+
+        btnAnimals.setOnAction(e -> {
+            try {
+                viewAnimals();
+                
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
                         .getName()).log(Level.SEVERE, null, ex);
@@ -713,8 +727,6 @@ public class capstoneRedo2 extends Application {
                 TextField txtNewMileage = new TextField();
                 TextField txtNewTask = new TextField();
                 Button btnSubmitNew = new Button("Submit New Event!");
-                logEventBackButton.setStyle(buttonStyle);
-
                 final ComboBox<Integer> cboMaxV = new ComboBox<>();
                 cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
@@ -729,7 +741,6 @@ public class capstoneRedo2 extends Application {
                 centerPane.add(cboMaxV, 1, 3);
                 centerPane.add(btnSubmitNew, 0, 4);
                 btnSubmitNew.setStyle(buttonStyle);
-                addlogEventBackButton();
                 addBackButton();
             });
 
@@ -1042,6 +1053,19 @@ public class capstoneRedo2 extends Application {
         centerPane.add(tableView, 0, 5);
         addBackButton();
         pane.setCenter(centerPane);
+    }
+
+    public void viewAnimals() throws SQLexception {
+        ComboBox<String> cboLocation = new ComboBox<>();
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        refreshCenterPane(centerPane);
+        
+        
+
     }
 
     public static void main(String[] args) {
