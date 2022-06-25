@@ -160,20 +160,6 @@ public class capstoneRedo2 extends Application {
         });
     }
 
-    private void addlogEventBackButton() {
-        BorderPane.setMargin(logEventBackButton, new Insets(0));
-        logEventBackButton.setStyle(buttonStyle);
-        logEventBackButton.setOnAction(e -> {
-            try {
-                logEvent();
-
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
-
     public void welcomeModule() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -475,13 +461,12 @@ public class capstoneRedo2 extends Application {
         btnAnimals.setOnAction(e -> {
             try {
                 viewAnimals();
-                
+
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-
         centerPane.setVgap(8);
         pane.setCenter(centerPane);
 
@@ -607,7 +592,9 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> cboTimeout = new ComboBox<>(Times);
         TextField tothours = new TextField();
         Button clockin = new Button("Check in");
+        clockin.setStyle(buttonStyle);
         Button submithours = new Button("Check Out");
+        submithours.setStyle(buttonStyle);
 
         pane.setTop(heading("Volunteer Check " + type));
 
@@ -750,7 +737,7 @@ public class capstoneRedo2 extends Application {
                     try (ResultSet rsEvents = statement.executeQuery(query)) {
                         while (rsEvents.next()) { //get database data
                             Event dbEvent = new Event();
-                            //                   dbEvent.setEventID(conn.dbResults.getInt(1));
+                            dbEvent.setEventID(rsEvents.getInt(1));
                             dbEvent.setLocation(rsEvents.getString(1));
                             dbEvent.setMileage(rsEvents.getString(2));
 //                    dbEvent.setTask(conn.dbResults.getString(4));
@@ -759,49 +746,37 @@ public class capstoneRedo2 extends Application {
                         }
                     }
                 } catch (SQLException ex) {
-
                 }
+                //give error if information isn't complete
+                if (txtMileage.getText().isEmpty()) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please enter all event information");
+                    alert.showAndWait();
+                } else {
+//                    try {
+//                    Event submittedEvent = new Event( //create new event
+//                            cboLocation.getValue(),
+//                            txtMileage.getText()
+//                    );
+//                            
+//                    String insert = "INSERT INTO EVENTS (EventID, Location, Mileage) VALUES (" + submittedEvent.eventID + ", '"
+//                            + cboLocation.getValue() + "', '" + txtMileage.getText() + "')";
+//                    statement.execute(insert);
+//                    statement.execute("commit");
 
-//
-//        submitEvent.setOnAction((ActionEvent e) -> {
-//            DBConnection conn = new DBConnection();
-//            String query = "Select location, mileage from events";
-//            try {
-//                conn.sendDBCommand(query);
-//                while (conn.dbResults.next()) { //get database data
-//                    Event dbEvent = new Event();
-//                    //                   dbEvent.setEventID(conn.dbResults.getInt(1));
-//                    dbEvent.setLocation(conn.dbResults.getString(1));
-//                    dbEvent.setMileage(conn.dbResults.getString(2));
-////                    dbEvent.setTask(conn.dbResults.getString(4));
-////                    dbEvent.setMaxVolunteers(conn.dbResults.getInt(5));
-//
-//
-//                }
-//                //give error if information isn't complete
-//                if (txtMileage.getText().isEmpty()) {
-//                    Alert alert = new Alert(Alert.AlertType.ERROR);
-//                    alert.setHeaderText("Please enter all data");
-//                    alert.showAndWait();
-//                } else {
-//                
-//                Event submittedEvent = new Event( //create new event
-//                        cboLocation.getValue(),
-//                        txtMileage.getText()
-//                        );
-//                String insert = "INSERT INTO EVENTS (EventID, Location, Mileage) VALUES (" + submittedEvent.EventID + ", '"
-//                        + cboLocation.getValue() + "', '" + txtMileage.getText() + "')";
-//                conn.sendDBCommand(insert);
-//                String commit = "commit";
-//                conn.sendDBCommand(commit);
-//
-//                //clear text fields after submission
-//                cboLocation.setValue(null);
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                alert.setHeaderText("Event Logged, \n"
-                        + "Thank You For Your Help!");
-                alert.showAndWait();
+                    //clear text fields after submission
+                    cboLocation.setValue(null);
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Event Logged, \n"
+                            + "Thank You For Your Help!");
+                    alert.showAndWait();
+
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(capstoneRedo2.class
+//                            .getName()).log(Level.SEVERE, null, ex);
+                }
             });
+
         }
     }
 
@@ -1055,17 +1030,129 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
     }
 
-    public void viewAnimals() throws SQLexception {
-        ComboBox<String> cboLocation = new ComboBox<>();
+    public void viewAnimals() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
         ds.setURL(connectionString);
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-        refreshCenterPane(centerPane);
-        
-        
 
+        refreshCenterPane(centerPane);
+
+        Button saveButton = new Button("Save");
+        saveButton.setStyle(buttonStyle);
+        ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
+        ObservableList<ObservableList> data = FXCollections.observableArrayList();
+        TableView tableView = new TableView();
+        ComboBox<String> cboStatus = new ComboBox<>();
+        ComboBox<String> animalList = new ComboBox<>();
+        cboStatus.setItems(status);
+
+        pane.setTop(heading("Our Animals"));
+        //Label lblSelection = new Label("Make Selection");
+        Label lblSpecies = new Label("Species \t");
+        Label lblStatus = new Label("Status \t");
+
+        HBox hbox1 = new HBox();
+        hbox1.getChildren().add(lblSpecies);
+        HBox hbox2 = new HBox();
+        hbox2.getChildren().add(animalList);
+        HBox hbox3 = new HBox();
+        hbox3.getChildren().add(lblStatus);
+        HBox hbox4 = new HBox();
+        hbox4.getChildren().add(cboStatus);
+
+        String selectSql = "select * from animals";
+        try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
+            while (rsAnimals.next()) {
+                Animal dbAnimals = new Animal();
+                dbAnimals.setAnimalID(rsAnimals.getInt(1));
+                dbAnimals.setName(rsAnimals.getString(2));
+                dbAnimals.setSpecies(rsAnimals.getString(3));
+                dbAnimals.setBreed(rsAnimals.getString(4));
+                dbAnimals.setAge(rsAnimals.getInt(5));
+                dbAnimals.setGender(rsAnimals.getString(6));
+                dbAnimals.setWeight(rsAnimals.getInt(7));
+                dbAnimals.setStatus(rsAnimals.getString(8));
+            }
+        } catch (SQLException ex) {
+        }
+        try { // populating combobox with all animals
+            String query = "Select animalID, Name, Species, Breed, Age, Gender, Weight, Status"
+                    + " from animals";
+            ResultSet rs = statement.executeQuery(query);
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+               col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
+                    @Override
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
+                tableView.getColumns().addAll(col);
+            }
+            while (rs.next()) {
+                int AnimalID = rs.getInt(1);
+                String Name = rs.getString(2); // getting first name from animals table
+                String Species = rs.getString(3); // getting species from animals table
+                String Breed = rs.getString(4); // getting breed from animals table
+                String Age = rs.getString(5);
+                String Gender = rs.getString(6);
+                String Weight = rs.getString(7);
+                String Status = rs.getString(8);
+                String animalInfo = AnimalID + " " + Name + " " + Species + " " 
+                        + Breed + " " + Age + " " + Gender + " " 
+                        + Weight + " " + Status; //combining into one string to add to the combobox
+                
+                animalList.getItems().add(Species); // populate combobox for applications
+                saveButton.setOnAction(e -> { // when save button is clicked
+                    try {
+                        //code to update the application status when button is clicked
+                        String selectedAppliation = animalList.getSelectionModel().getSelectedItem();
+                        String[] info = selectedAppliation.split(" ");
+                        String id = info[0];
+                        String selectedDecision = cboStatus.getSelectionModel().getSelectedItem();
+                        String sql = "update application set status= '" + selectedDecision + "' "
+                                + "where applicationID= " + id;
+                        statement.executeQuery(sql);
+                        if (selectedDecision.equals("Approved")) { //if the application status is changed to approved
+                            //Create new volunteer object
+                            Volunteer newVolunteer = new Volunteer("Volunteer in Training", "None", 0.0, Integer.valueOf(id));
+                            // System.out.println(newVolunteer);
+                            String sqlQuery = "insert into volunteers (volunteerid, title, specialization, hours, applicationid)"
+                                    + " values (" + newVolunteer.volunteerID + ", '" + newVolunteer.title + "', '"
+                                    + newVolunteer.specialization + "', " + newVolunteer.hours + ", " + newVolunteer.appID + ")";
+                            statement.executeQuery(sqlQuery);
+                            statement.executeQuery("commit");
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setHeaderText("Application Accepted");
+                            alert.showAndWait();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setHeaderText("Application Denied");
+                            alert.showAndWait();
+                        }
+                    } catch (SQLException ex) {
+                    }
+                }); //getting the db data into the table view
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    row.add(rs.getString(i));
+                }
+                data.add(row);
+            }
+            tableView.setItems(data);
+        } catch (SQLException ex) {
+        }
+        centerPane.add(hbox1, 0, 1);
+        centerPane.add(hbox2, 0, 2);
+        centerPane.add(hbox3, 0, 3);
+        centerPane.add(hbox4, 0, 4);
+        centerPane.add(saveButton, 0, 5);
+        centerPane.add(tableView, 0, 6);
+        addBackButton();
+        pane.setCenter(centerPane);
     }
 
     public static void main(String[] args) {
