@@ -13,7 +13,7 @@ public class Animal {
     public int animalID;
     public String name, species, breed, gender, status;
     public int age;
-    public double weight;
+    public int weight;
     
     public Animal(){
         this.animalID = 0;
@@ -27,7 +27,7 @@ public class Animal {
         
     }
     
-    public Animal(int aID, String n, String s, String b, int a, String g, double w, String stat){
+    public Animal(int aID, String n, String s, String b, int a, String g, int w, String stat){
         this.animalID = aID;
         this.name = n;
         this.species = s;
@@ -81,7 +81,7 @@ public class Animal {
     public void setGender(String g){
         this.gender = g;
     }
-    public void setWeight(double w){
+    public void setWeight(int w){
         this.weight = w;
     }
     public void setStatus(String st){
