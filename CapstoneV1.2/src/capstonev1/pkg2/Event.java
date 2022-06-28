@@ -1,36 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package capstonev1.pkg2;
 
-/**
- *
- * @author Vanessa Quinteros
- */
 public class Event {
-       public int eventID;
+    public int eventID;
     public String location,mileage,task;
     public int volunteerID, maxVolunteers;
+    static public int eventCount = 500;
     public final static int MAXEVENTS = 500;
     public static Event[] events = new Event[MAXEVENTS];
     
     public Event(){
-        this.eventID = 0;
+        this.eventID = eventCount;
         this.location = null;
         this.mileage = null;
         this.task = null;
         this.maxVolunteers = 0;
-        this.volunteerID = 0;
+        eventCount++;
     }
-    public Event(int evID,String loc,String mile,String t,int maxV,int volID){
-        this.eventID = evID;
+    public Event(String loc,String mile,String t,int maxV){
+        this.eventID = eventCount;
         this.location = loc;
         this.mileage = mile;
         this.task = t;
         this.maxVolunteers = maxV;
-        this.volunteerID = volID;
+        eventCount++;
     }
      //GETTERS
     public int getEventID(){
@@ -71,6 +63,9 @@ public class Event {
     }
     public void setVolunteerID(int vID){
         this.volunteerID = vID;
+    }
+    public String toString(){
+        return this.eventID + " " + this.location + " " + this.mileage + " " + this.task + " " + this.maxVolunteers;
     }
     
 }

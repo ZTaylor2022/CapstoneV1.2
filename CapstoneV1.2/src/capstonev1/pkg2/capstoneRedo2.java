@@ -676,7 +676,6 @@ public class capstoneRedo2 extends Application {
     }
 
     public void logEvent() throws SQLException {
-
         ComboBox<String> cboLocation = new ComboBox<>();
         TextField txtMileage = new TextField();
         ComboBox<Integer> cboMaxV = new ComboBox<>();
@@ -751,57 +750,55 @@ public class capstoneRedo2 extends Application {
         centerPane.add(submitEvent, 1, 4);
         submitEvent.setStyle(buttonStyle);
         addBackButton();
-
-        submitEvent.setOnAction((ActionEvent e) -> {
-            String query = "Select location, mileage, task, maxvolunteers from events";
-            try {
-                try (ResultSet rsEvents = statement.executeQuery(query)) {
-                    while (rsEvents.next()) { //get database data
-                        Event dbEvent = new Event();
-                        dbEvent.setEventID(rsEvents.getInt(1));
-                        dbEvent.setLocation(rsEvents.getString(1));
-                        dbEvent.setMileage(rsEvents.getString(2));
-                        dbEvent.setTask(rsEvents.getString(4));
-                        dbEvent.setMaxVolunteers(rsEvents.getInt(5));
-                    }
+        String query = "Select location, mileage, task, maxvolunteers from events";
+        try {
+            try (ResultSet rsEvents = statement.executeQuery(query)) {
+                while (rsEvents.next()) { //get database data
+                    Event dbEvent = new Event();
+                    dbEvent.setEventID(rsEvents.getInt(1));
+                    dbEvent.setLocation(rsEvents.getString(1));
+                    dbEvent.setMileage(rsEvents.getString(2));
+                    dbEvent.setTask(rsEvents.getString(4));
+                    dbEvent.setMaxVolunteers(rsEvents.getInt(5));
                 }
-            } catch (SQLException ex) {
             }
+        } catch (SQLException ex) {
+        }
+        
+        submitEvent.setOnAction((ActionEvent e) -> {
             //give error if information isn't complete
             if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || cboMaxV.getValue() == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("Please enter all event information");
                 alert.showAndWait();
             } else {
-//                try {
-//                    Event submittedEvent = new Event(
-//                            EventID.getInt(),
-//                            cboLocation.getValue(),
-//                            txtMileage.getText(),
-//                            cboTask.getValue(),
-//                            cboMaxV.getValue()
-//                    );
-//                    String insert = "INSERT INTO EVENTS (EventID, Location, Mileage, Task, MaxVolunteers) VALUES (" + submittedEvent.eventID + ", '"
-//                            + cboLocation.getValue() + "', '" + txtMileage.getText() + cboTask.getValue() + "', '"
-//                            + cboMaxV.getValue() + "', '" + "')";
-//                    statement.execute(insert);
-//                    statement.execute("commit");
+                try {
+                    Event submittedEvent = new Event(
+                            cboLocation.getValue(),
+                            txtMileage.getText(),
+                            cboTask.getValue(),
+                            cboMaxV.getValue()
+                    );
+                    System.out.println(submittedEvent);
+                    String insert = "INSERT INTO EVENTS (EventID, Location, Mileage, Task, MaxVolunteers) VALUES (" + submittedEvent.eventID + ", '"
+                            + cboLocation.getValue() + "', '" + txtMileage.getText() + "', '" + cboTask.getValue() + "', '"
+                            + cboMaxV.getValue() + "')";
+                    statement.execute(insert);
+                    statement.execute("commit");
 
-                //clear text fields after submission
-                cboLocation.setValue(null);
-                txtMileage.setText("");
-                cboTask.setValue(null);
-                cboMaxV.setValue(null);
+                    //clear text fields after submission
+                    cboLocation.setValue(null);
+                    txtMileage.setText("");
+                    cboTask.setValue(null);
+                    cboMaxV.setValue(null);
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                alert.setHeaderText("Event Logged, \n"
-                        + "Thank You For Your Help!");
-                alert.showAndWait();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Event Logged, \n"
+                            + "Thank You For Your Help!");
+                    alert.showAndWait();
 
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(capstoneRedo2.class
-//                            .getName()).log(Level.SEVERE, null, ex);
-//                }
+                } catch (SQLException ex) {
+                }
             }
         }
         );
