@@ -705,32 +705,32 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
 
-        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+//        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
-            @Override
-            public void changed(ObservableValue ov, Object t, Object t1) {
-                switch (t1.toString()) {
-                    case "":
-                        txtMileage.setText(" ");
-                        break;
-                    case "Charlottesville":
-                        txtMileage.setText("62");
-                        break;
-                    case "Luray":
-                        txtMileage.setText("33");
-                        break;
-                    case "Lynchburg":
-                        txtMileage.setText("97");
-                        break;
-                    case "Richmond":
-                        txtMileage.setText("130");
-                        break;
-                    case "Washington":
-                        txtMileage.setText("132");
-                        break;
-                }
-            }
-        });
+//            @Override
+//            public void changed(ObservableValue ov, Object t, Object t1) {
+//                switch (t1.toString()) {
+//                    case "":
+//                        txtMileage.setText(" ");
+//                        break;
+//                    case "Charlottesville":
+//                        txtMileage.setText("62");
+//                        break;
+//                    case "Luray":
+//                        txtMileage.setText("33");
+//                        break;
+//                    case "Lynchburg":
+//                        txtMileage.setText("97");
+//                        break;
+//                    case "Richmond":
+//                        txtMileage.setText("130");
+//                        break;
+//                    case "Washington":
+//                        txtMileage.setText("132");
+//                        break;
+//                }
+//            }
+//        });
 
         refreshCenterPane(centerPane);
 
@@ -750,7 +750,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(submitEvent, 1, 4);
         submitEvent.setStyle(buttonStyle);
         addBackButton();
-        String query = "Select location, mileage, task, maxvolunteers from events";
+        String query = "Select * from events";
         try {
             try (ResultSet rsEvents = statement.executeQuery(query)) {
                 while (rsEvents.next()) { //get database data
@@ -779,7 +779,7 @@ public class capstoneRedo2 extends Application {
                             cboTask.getValue(),
                             cboMaxV.getValue()
                     );
-                    System.out.println(submittedEvent);
+                    //System.out.println(submittedEvent);
                     String insert = "INSERT INTO EVENTS (EventID, Location, Mileage, Task, MaxVolunteers) VALUES (" + submittedEvent.eventID + ", '"
                             + cboLocation.getValue() + "', '" + txtMileage.getText() + "', '" + cboTask.getValue() + "', '"
                             + cboMaxV.getValue() + "')";
