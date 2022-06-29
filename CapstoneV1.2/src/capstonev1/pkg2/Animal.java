@@ -17,7 +17,6 @@ public class Animal {
         this.weight = 0;
         this.status = null;
         animalCount++;
-        
     }
     
     public Animal(String n, String s, String b, int a, String g, int w, String stat){
