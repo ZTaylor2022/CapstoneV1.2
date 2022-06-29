@@ -695,7 +695,7 @@ try {
                 newShift.setTimeOut("None");
                 newShift.setDate(todaysDate);
                 newShift.setTaskID(Integer.valueOf(id));
-               //newShift.setAnimalID(Integer.valueOf(animalID);
+            //   newShift.setAnimalID(Integer.valueOf(animalID);
 //            Shifts newShift = new Shifts(
                 System.out.println(newShift);
                 String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID)"
