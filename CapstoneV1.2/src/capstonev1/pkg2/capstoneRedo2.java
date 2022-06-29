@@ -436,12 +436,12 @@ public class capstoneRedo2 extends Application {
 
         centerPane.add(subHeading("Please Choose From Menu"), 0, 0);
         centerPane.add(checkInOut, 0, 1);
-        centerPane.add(reportsButton, 0, 2);
-        centerPane.add(socialButton, 0, 3);
-        centerPane.add(logEventButton, 0, 4);
-        centerPane.add(assignSpecButton, 0, 5);
-        centerPane.add(applicationApproval, 0, 6);
-        centerPane.add(btnAnimals, 0, 7);
+        centerPane.add(applicationApproval, 0, 2);
+        centerPane.add(btnAnimals, 0, 3);
+        centerPane.add(assignSpecButton, 0, 4);
+        centerPane.add(logEventButton, 0, 5);
+        centerPane.add(reportsButton, 0, 6);
+        centerPane.add(socialButton, 0, 7);
 
         checkInOut.setOnAction(e -> {
             try {
@@ -586,7 +586,6 @@ public class capstoneRedo2 extends Application {
         String todaysDate = date.format(new Date());
         Label dateLbl = new Label(todaysDate);
         ComboBox<String> cboTasks = new ComboBox<>();
-        ComboBox<String> cboLocation = new ComboBox<>();
         Button clockin = new Button("Check in");
         clockin.setStyle(buttonStyle);
         Button clockout = new Button("Check Out");
@@ -602,9 +601,8 @@ public class capstoneRedo2 extends Application {
         centerPane.add(dateLbl, 1, 1);
         centerPane.add(timeLbl, 1, 2);
         centerPane.add(cboTasks, 1, 3);
-        centerPane.add(cboLocation, 1, 4);
         centerPane.add(clockin, 0, 7);
-        centerPane.add(clockout, 0, 8);
+        centerPane.add(clockout, 1, 7);
 
         ResultSet rsTasks = statement.executeQuery("select taskid, description, location, Mileage from Tasks");
         while (rsTasks.next()) {
