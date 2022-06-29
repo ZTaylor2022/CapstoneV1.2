@@ -1076,37 +1076,7 @@ public class capstoneRedo2 extends Application {
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
-        // 'Add Animal' Button
-        // takes you to addAnimals()
-        addAnimal.setOnAction(e -> {
-            try {
-                addAnimals();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        // 'Update Animal' Button 
-        // takes you to updateAnimal()
-        updateStatus.setOnAction(e -> {
-            try {
-                updateAnimal();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        // 'Check In / Out' Button
-        // takes you to animalCheck()
-        animalCheck.setOnAction(e -> {
-            try {
-                animalCheck();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-
+    
         // Inital page
         String selectSql = "select * from animals";
         try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
@@ -1163,7 +1133,7 @@ public class capstoneRedo2 extends Application {
             tableHome.setItems(data);
         } catch (SQLException ex) {
         }
-        refreshCenterPane(centerPane);
+      //  refreshCenterPane(centerPane);
 
         top.setAlignment(Pos.CENTER);
 
@@ -1175,6 +1145,37 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
         addBackButton();
+           // 'Add Animal' Button
+        // takes you to addAnimals()
+        addAnimal.setOnAction(e -> {
+            try {
+                addAnimals();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        // 'Update Animal' Button 
+        // takes you to updateAnimal()
+        updateStatus.setOnAction(e -> {
+            try {
+                updateAnimal();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        // 'Check In / Out' Button
+        // takes you to animalCheck()
+        animalCheck.setOnAction(e -> {
+            try {
+                animalCheck();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+
     }
 
     public void addAnimals() throws SQLException {
@@ -1184,6 +1185,7 @@ public class capstoneRedo2 extends Application {
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         refreshCenterPane(centerPane);
+        
         pane.setTop(heading("Add a New Animal"));
         centerPane.add(lblName, 0, 2);
         centerPane.add(txtName, 1, 2);
