@@ -87,7 +87,6 @@ public class capstoneRedo2 extends Application {
     ToolBar toolBar = new ToolBar();
     ToolBar toolBarA = new ToolBar();
     Button applicationBackButton = new Button("Back");
-    Button logEventBackButton = new Button("Back");
     Button backAnimals = new Button("Back");
 
     String fontStyle = "garamond";
@@ -101,6 +100,32 @@ public class capstoneRedo2 extends Application {
     Button report2 = new Button("Event Attendance");
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
+
+    // animal functions
+    Button updateStatus = new Button("Update Status");
+    Button animalCheck = new Button("Check In / Out");
+    Button addAnimal = new Button("Add Animal");
+    Button saveButton = new Button("Save");
+    ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
+    ObservableList<ObservableList> data = FXCollections.observableArrayList();
+    TableView tableHome = new TableView();
+    TableView tableUpdate = new TableView();
+    ComboBox<String> cboStatus = new ComboBox<>();
+    ComboBox<String> cboAnimal = new ComboBox<>();
+    ComboBox<String> cboSpecies = new ComboBox<>();
+    ComboBox<String> cboGender = new ComboBox<>();
+    Label lblName = new Label("Enter Animal Name");
+    TextField txtName = new TextField();
+    Label lblSpecies = new Label("Select Species");
+    Label lblBreed = new Label("Enter Animal Breed");
+    TextField txtBreed = new TextField();
+    Label lblAge = new Label("Enter Animal Age");
+    ComboBox<Integer> cboAge = new ComboBox<>();
+    Label lblWeight = new Label("Enter Animal Weight (lbs)");
+    ComboBox<Integer> cboWeight = new ComboBox<>();
+    Label lblGender = new Label("Enter Gender");
+    Label lblStatus = new Label("Animal Status");
+    TextField txtStatus = new TextField("Evaluating for adoption");
 
     public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
@@ -118,6 +143,30 @@ public class capstoneRedo2 extends Application {
 
         toolBar.getItems().addAll(report1, report2, report3, report4);
 
+        // Animal functions
+        saveButton.setStyle(buttonStyle);
+        cboGender.getItems().addAll("Male", "Female");
+
+        cboAge.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50);
+        cboSpecies.getItems().addAll("Dog", "Cat", "Rabbit", "Fish", "Lizard", "Snake", "Hamster", "Ferret", "Chicken", "Pig");
+        cboSpecies.setEditable(true);
+        txtStatus.setEditable(false);
+        cboStatus.setItems(status);
+        cboWeight.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+                51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+                61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+                71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+                81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+                91, 92, 93, 94, 95, 96, 97, 98, 99, 100);
+        cboWeight.setEditable(true);
         centerPane.setHgap(10.0);
 
         Scene scene = new Scene(pane, 500, 500); //Create a scene
@@ -233,6 +282,15 @@ public class capstoneRedo2 extends Application {
             try {
                 applicationScreen();
 
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+
+        addAnimal.setOnAction(e -> {
+            try {
+                addAnimals();
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
                         .getName()).log(Level.SEVERE, null, ex);
@@ -705,33 +763,6 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
 
-//        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-
-//            @Override
-//            public void changed(ObservableValue ov, Object t, Object t1) {
-//                switch (t1.toString()) {
-//                    case "":
-//                        txtMileage.setText(" ");
-//                        break;
-//                    case "Charlottesville":
-//                        txtMileage.setText("62");
-//                        break;
-//                    case "Luray":
-//                        txtMileage.setText("33");
-//                        break;
-//                    case "Lynchburg":
-//                        txtMileage.setText("97");
-//                        break;
-//                    case "Richmond":
-//                        txtMileage.setText("130");
-//                        break;
-//                    case "Washington":
-//                        txtMileage.setText("132");
-//                        break;
-//                }
-//            }
-//        });
-
         refreshCenterPane(centerPane);
 
         pane.setTop(heading("LOG EVENT"));
@@ -764,10 +795,10 @@ public class capstoneRedo2 extends Application {
             }
         } catch (SQLException ex) {
         }
-        
+
         submitEvent.setOnAction((ActionEvent e) -> {
             //give error if information isn't complete
-            if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || cboMaxV.getValue() == null) {
+            if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || cboTask.getValue() == null || cboMaxV.getValue() == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("Please enter all event information");
                 alert.showAndWait();
@@ -804,7 +835,6 @@ public class capstoneRedo2 extends Application {
         );
 
         pane.setCenter(centerPane);
-
     }
 
     public void reports() {
@@ -1065,131 +1095,44 @@ public class capstoneRedo2 extends Application {
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
         refreshCenterPane(centerPane);
-        // top buttons
-        Button updateStatus = new Button("Update Status");
-        Button checkIn = new Button("Check In / Out");
-        Button addAnimal = new Button("Add Animal");
-        Button saveButton = new Button("Save");
-        saveButton.setStyle(buttonStyle);
-        ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
-        ObservableList<ObservableList> data = FXCollections.observableArrayList();
-        TableView tableHome = new TableView();
-        ComboBox<String> cboStatus = new ComboBox<>();
-        ComboBox<String> cboAnimal = new ComboBox<>();
-        ComboBox<String> cboSpecies = new ComboBox<>();
-        cboSpecies.getItems().addAll("Dog", "Cat", "Rabbit", "Fish", "Lizard", "Snake", "Hamster", "Ferret", "Chicken", "Pig");
-        cboSpecies.setEditable(true);
-        ComboBox<String> cboGender = new ComboBox<>();
-        cboGender.getItems().addAll("Male", "Female");
-        Label lblName = new Label("Enter Animal Name");
-        TextField txtName = new TextField();
-        Label lblSpecies = new Label("Select Species");
-        Label lblBreed = new Label("Enter Animal Breed");
-        TextField txtBreed = new TextField();
-        Label lblAge = new Label("Enter Animal Age");
-        ComboBox<Integer> cboAge = new ComboBox<>();
-        cboAge.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50);
-        Label lblWeight = new Label("Enter Animal Weight (lbs)");
-        ComboBox<Integer> cboWeight = new ComboBox<>();
-        cboWeight.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-                71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-                81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-                91, 92, 93, 94, 95, 96, 97, 98, 99, 100);
-        cboWeight.setEditable(true);
-        Label lblGender = new Label("Enter Gender");
-        Label lblStatus = new Label("Animal Status");
-        TextField txtStatus = new TextField("Evaluating for adoption");
-        txtStatus.setEditable(false);
-        cboStatus.setItems(status);
-
         pane.setTop(heading("Current Animals"));
 
         HBox top = new HBox();
-        top.getChildren().addAll(addAnimal, updateStatus, checkIn);
+        top.getChildren().addAll(addAnimal, updateStatus, animalCheck);
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
-        // Adding a new animal action
+        // 'Add Animal' Button
+        // takes you to addAnimals()
         addAnimal.setOnAction(e -> {
-            
-            refreshCenterPane(centerPane);
-            pane.setTop(heading("Add a New Animal"));
-            centerPane.add(lblName, 0, 2);
-            centerPane.add(txtName, 1, 2);
-            centerPane.add(lblSpecies, 0, 3);
-            centerPane.add(cboSpecies, 1, 3);
-            centerPane.add(lblBreed, 0, 4);
-            centerPane.add(txtBreed, 1, 4);
-            centerPane.add(lblAge, 0, 5);
-            centerPane.add(cboAge, 1, 5);
-            centerPane.add(lblGender, 0, 6);
-            centerPane.add(cboGender, 1, 6);
-            centerPane.add(lblWeight, 0, 7);
-            centerPane.add(cboWeight, 1, 7);
-            centerPane.add(lblStatus, 0, 9);
-            centerPane.add(txtStatus, 1, 9);
-            centerPane.add(saveButton, 0, 10);
-            pane.setBottom(backAnimals);
-            saveButton.setOnAction(ee -> {
-            //give error if any fields are empty
-            if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() ||cboAge.getValue() == null
-                    || cboGender.getValue() == null || cboWeight.getValue() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please Enter All Animal Information");
-                alert.showAndWait();
-            } else {
- //               try {
-//                    Animal submittedAnimal = new Animal( //create new animal
-//                            txtName.getText(),
-//                            cboSpecies.getValue(),
-//                            txtBreed.getText(),
-//                            cboAge.getValue(),
-//                            cboGender.getValue(),
-//                            cboWeight.getValue(),
-//                            txtStatus.getText()
-//                    );
-//                    String insert = "Insert into Animals (animalID,Name,Species,BReed,Age,Gender,Weight,Status) VALUES (" + submittedAnimal.animalID + ", '"
-//                            + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', '"
-//                            + applicationEmail.getText() + "', '" + applicationPassword.getText() + "', '" + applicationAddress.getText() + "', '" + applicationExperience.getValue() + "', '"
-//                            + submittedApp.getStatus() + "')";
-//                    statement.execute(insert);
-//                    statement.execute("commit");
-
-                    //clear text fields after submission
-                    txtName.setText("");
-                    cboSpecies.setValue(null);
-                    txtBreed.setText("");
-                    cboAge.setValue(null);
-                    cboGender.setValue(null);
-                    cboWeight.setValue(null);
-                    txtStatus.setText("Evaluating for adoption");
-
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Application Submitted!");
-                    alert.showAndWait();
-
-//                } catch (SQLException ex) {
-//                    Logger.getLogger(capstoneRedo2.class
-//                            .getName()).log(Level.SEVERE, null, ex);
-//                }
+            try {
+                addAnimals();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
-                
-            });
-            
-            pane.setBottom(backAnimals);
+        // 'Update Animal' Button 
+        // takes you to updateAnimal()
+        updateStatus.setOnAction(e -> {
+            try {
+                updateAnimal();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        // 'Check In / Out' Button
+        // takes you to animalCheck()
+        animalCheck.setOnAction(e -> {
+            try {
+                animalCheck();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
-        
         // Inital page
         String selectSql = "select * from animals";
         try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
@@ -1235,7 +1178,6 @@ public class capstoneRedo2 extends Application {
                         + weight + " " + Status; //combining into one string to add to the combobox
 
                 cboAnimal.getItems().add(name); // populate combobox for animals
-                
 
                 //getting the db data into the table view
                 ObservableList<String> row = FXCollections.observableArrayList();
@@ -1259,6 +1201,102 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
         addBackButton();
+    }
+
+    public void addAnimals() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        refreshCenterPane(centerPane);
+        pane.setTop(heading("Add a New Animal"));
+        centerPane.add(lblName, 0, 2);
+        centerPane.add(txtName, 1, 2);
+        centerPane.add(lblSpecies, 0, 3);
+        centerPane.add(cboSpecies, 1, 3);
+        centerPane.add(lblBreed, 0, 4);
+        centerPane.add(txtBreed, 1, 4);
+        centerPane.add(lblAge, 0, 5);
+        centerPane.add(cboAge, 1, 5);
+        centerPane.add(lblGender, 0, 6);
+        centerPane.add(cboGender, 1, 6);
+        centerPane.add(lblWeight, 0, 7);
+        centerPane.add(cboWeight, 1, 7);
+        centerPane.add(lblStatus, 0, 9);
+        centerPane.add(txtStatus, 1, 9);
+        centerPane.add(saveButton, 0, 10);
+        pane.setBottom(backAnimals);
+
+        saveButton.setOnAction(ee -> {
+            //give error if any fields are empty
+            if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || cboAge.getValue() == null
+                    || cboGender.getValue() == null || cboWeight.getValue() == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Please Enter All Animal Information");
+                alert.showAndWait();
+            } else {
+                try {
+                    Animal submittedAnimal = new Animal( //create new animal
+                            txtName.getText(),
+                            cboSpecies.getValue(),
+                            txtBreed.getText(),
+                            cboAge.getValue(),
+                            cboGender.getValue(),
+                            cboWeight.getValue(),
+                            txtStatus.getText()
+                    );
+                    String insert = "Insert into Animals (animalID,Name,Species,BReed,Age,Gender,Weight,Status) VALUES (" + submittedAnimal.animalID + ", '"
+                            + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', '"
+                            + cboAge.getValue() + "', '" + cboWeight.getValue() + "', '" + txtStatus.getText() + "')";
+                    statement.execute(insert);
+                    statement.execute("commit");
+
+                    //clear text fields after submission
+                    txtName.setText("");
+                    cboSpecies.setValue(null);
+                    txtBreed.setText("");
+                    cboAge.setValue(null);
+                    cboGender.setValue(null);
+                    cboWeight.setValue(null);
+                    txtStatus.setText("Evaluating for adoption");
+
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    alert.setHeaderText("Application Submitted!");
+                    alert.showAndWait();
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(capstoneRedo2.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+    }
+
+    public void updateAnimal() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+        refreshCenterPane(centerPane);
+        pane.setTop(heading("Update Animals Status"));
+        pane.setBottom(backAnimals);
+
+    }
+
+    public void animalCheck() throws SQLException {
+        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
+        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
+        ds.setURL(connectionString);
+        Connection con = ds.getConnection("javauser", "javapass");
+        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+        refreshCenterPane(centerPane);
+        pane.setTop(heading("Animal Check In / Out"));
+        pane.setBottom(backAnimals);
+
     }
 
     public static void main(String[] args) {
