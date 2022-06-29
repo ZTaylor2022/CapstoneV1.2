@@ -6,7 +6,7 @@ package capstonev1.pkg2;
  * @author Vanessa Quinteros
  */
 public class Shifts {
-    public int volID,taskID;
+    public int volID,taskID,animalID;
     public String timein, timeout, shiftDate;
     public static int count = 1;
     
@@ -17,12 +17,13 @@ public class Shifts {
     count++;
     }
     
-    public Shifts(int vol, String in, String out, String date, int tID){
+    public Shifts(int vol, String in, String out, String date, int tID, int aID){
         this.volID = vol;
         this.timein = in;
         this.timeout = out;
         this.shiftDate = date;
         this.taskID = tID;
+        this.animalID = aID;
         count++;
     }
     
@@ -40,6 +41,9 @@ public class Shifts {
     }
     public int getTaskID(){
         return taskID;
+    }
+    public int getAnimalID(){
+        return animalID;
     }
     
     
@@ -63,6 +67,9 @@ public class Shifts {
 
     public void setTaskID(int h) {
        this.taskID = h;
+    }
+    public void setAniamlID(int a) {
+        this.animalID = a;
     }
 }
 
