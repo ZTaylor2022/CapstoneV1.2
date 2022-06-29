@@ -628,7 +628,7 @@ public class capstoneRedo2 extends Application {
 
         refreshCenterPane(centerPane);
 
-        SimpleDateFormat time = new SimpleDateFormat("hh:mm");
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm");
         String timeNow = time.format(new Date());
         Label timeLbl = new Label(timeNow);
         SimpleDateFormat date = new SimpleDateFormat("yyyy/MM/dd");
