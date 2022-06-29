@@ -8,11 +8,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
 import java.util.Set;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +91,8 @@ public class capstoneRedo2 extends Application {
     Button applicationBackButton = new Button("Back");
     Button logEventBackButton = new Button("Back");
     Button backAnimals = new Button("Back");
+    String user;
+    int loggedInVolID; //Use this to get the id number of the volunteer that is logged in
 
     String fontStyle = "garamond";
 
@@ -189,11 +193,11 @@ public class capstoneRedo2 extends Application {
         t.setOnAction(e -> {
             homeScreen();
         });
-        loginButton.setOnAction(e -> {
 
+        loginButton.setOnAction(e -> {
+            user = userNameTF.getText();
+            String pass = passwordTF.getText();
             try {
-                String user = userNameTF.getText();
-                String pass = passwordTF.getText();
                 ResultSet rs = statement.executeQuery("select a.password from application a, volunteers v "
                         + "where a.applicationid = v.applicationid and a.email = '" + user + "'");
                 if (!rs.isBeforeFirst()) {
@@ -210,10 +214,20 @@ public class capstoneRedo2 extends Application {
                             Alert alert = new Alert(Alert.AlertType.ERROR);
                             alert.setHeaderText("Invalid credentials");
                             alert.showAndWait();
-
                         }
                     }
                 }
+                ResultSet rsVolID = statement.executeQuery("select volunteerid "
+                        + "from volunteers "
+                        + "where applicationid = "
+                        + "    (select applicationid "
+                        + "        from application "
+                        + "         where email = '" + user + "')");
+                while (rsVolID.next()) {
+                    int volID = rsVolID.getInt(1);
+                    loggedInVolID = volID;
+                }
+
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
                         .getName()).log(Level.SEVERE, null, ex);
@@ -402,17 +416,15 @@ public class capstoneRedo2 extends Application {
     public void homeScreen() {
         pane.setTop(heading("Volunteer Home Screen"));
 
-        Button volunteerCheckInButton = new Button("Volunteer Check In");
-        Button volunteerCheckOutButton = new Button("Volunteer Check Out");
+        Button checkInOut = new Button("Check In/Out");
         Button reportsButton = new Button("Reports Page");
         Button socialButton = new Button("Social Page");
-        Button logEventButton = new Button("Log Event");
+        Button logEventButton = new Button("Create A Task");
         Button assignSpecButton = new Button("Assign Specialization");
         Button applicationApproval = new Button("View Pending Applications");
         Button btnAnimals = new Button("View Animals");
 
-        volunteerCheckInButton.setStyle(buttonStyle);
-        volunteerCheckOutButton.setStyle(buttonStyle);
+        checkInOut.setStyle(buttonStyle);
         reportsButton.setStyle(buttonStyle);
         socialButton.setStyle(buttonStyle);
         logEventButton.setStyle(buttonStyle);
@@ -423,27 +435,17 @@ public class capstoneRedo2 extends Application {
         refreshCenterPane(centerPane);
 
         centerPane.add(subHeading("Please Choose From Menu"), 0, 0);
-        centerPane.add(volunteerCheckInButton, 0, 1);
-        centerPane.add(volunteerCheckOutButton, 0, 2);
-        centerPane.add(reportsButton, 0, 3);
-        centerPane.add(socialButton, 0, 4);
-        centerPane.add(logEventButton, 0, 5);
-        centerPane.add(assignSpecButton, 0, 6);
-        centerPane.add(applicationApproval, 0, 7);
-        centerPane.add(btnAnimals, 0, 8);
+        centerPane.add(checkInOut, 0, 1);
+        centerPane.add(reportsButton, 0, 2);
+        centerPane.add(socialButton, 0, 3);
+        centerPane.add(logEventButton, 0, 4);
+        centerPane.add(assignSpecButton, 0, 5);
+        centerPane.add(applicationApproval, 0, 6);
+        centerPane.add(btnAnimals, 0, 7);
 
-        volunteerCheckInButton.setOnAction(e -> {
+        checkInOut.setOnAction(e -> {
             try {
-                volunteerCheckIO("In");
-
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        volunteerCheckOutButton.setOnAction(e -> {
-            try {
-                volunteerCheckIO("Out");
+                volunteerCheckIO();
 
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
@@ -452,7 +454,7 @@ public class capstoneRedo2 extends Application {
         });
         logEventButton.setOnAction(e -> {
             try {
-                logEvent();
+                logTask();
 
             } catch (SQLException ex) {
                 Logger.getLogger(capstoneRedo2.class
@@ -555,7 +557,6 @@ public class capstoneRedo2 extends Application {
 
             }
         } catch (SQLException ex) {
-
         }
         specializations.setEditable(true);
         centerPane.add(volunteersList, 1, 1);
@@ -569,118 +570,103 @@ public class capstoneRedo2 extends Application {
     }
 
     //public void volunteerCheckIO(String type) {
-    public void volunteerCheckIO(String type) throws SQLException {
-        refreshCenterPane(centerPane);
-
-        ObservableList<String> Times
-                = FXCollections.observableArrayList(
-                        "9:00 A.M",
-                        "9:15 A.M",
-                        "9:30 A.M",
-                        "9:45 A.M",
-                        "10:00 A.M",
-                        "10:15 A.M",
-                        "10:30 A.M",
-                        "10:45 A.M",
-                        "11:00 A.M",
-                        "11:15 A.M",
-                        "11:30 A.M",
-                        "11:45 A.M",
-                        "12:00 P.M",
-                        "12:15 P.M",
-                        "12:30 P.M",
-                        "12:45 P.M",
-                        "1:00 P.M",
-                        "1:15 P.M",
-                        "1:30 P.M",
-                        "1:45 P.M",
-                        "2:00 P.M",
-                        "2:15 P.M",
-                        "2:30 P.M",
-                        "2:45 P.M",
-                        "3:00 P.M",
-                        "3:15 P.M",
-                        "3:30 P.M",
-                        "3:45 P.M",
-                        "4:00 P.M",
-                        "4:15 P.M",
-                        "4:30 P.M",
-                        "4:45 P.M",
-                        "5:00 P.M"
-                );
-
-        ComboBox<String> cboTimein = new ComboBox<>(Times);
-        ComboBox<String> cboTasks = new ComboBox<>();
-        ComboBox<String> cboLocation = new ComboBox<>();
-        ComboBox<String> cboTimeout = new ComboBox<>(Times);
-        TextField tothours = new TextField();
-        Button clockin = new Button("Check in");
-        clockin.setStyle(buttonStyle);
-        Button submithours = new Button("Check Out");
-        submithours.setStyle(buttonStyle);
-
-        pane.setTop(heading("Volunteer Check " + type));
-
-        if (type.equals("In")) {
-            centerPane.add(labelText("Available Tasks: "), 0, 0);
-            centerPane.add(labelText("Check-In Location: "), 0, 1);
-            centerPane.add(labelText("Time In: "), 0, 2);
-            centerPane.add(cboTasks, 1, 0);
-            centerPane.add(cboLocation, 1, 1);
-            centerPane.add(cboTimein, 1, 2);
-            centerPane.add(clockin, 0, 7);
-
-            clockin.setOnAction(e -> {
-
-                Alert userPrompt = new Alert(Alert.AlertType.NONE,
-                        "You have checked in, Return to Home Screen when you wish to check out.",
-                        ButtonType.OK);
-                userPrompt.show();
-            });
-
-        } else if (type.equals("Out")) {
-            centerPane.add(labelText("Time Out: "), 0, 0);
-            centerPane.add(labelText("Enter total hours: "), 0, 1);
-            centerPane.add(cboTimeout, 1, 0);
-            centerPane.add(tothours, 1, 1);
-            centerPane.add(submithours, 0, 5);
-
-            submithours.setOnAction(e -> {
-                tothours.clear();
-
-                Alert userPrompt = new Alert(Alert.AlertType.NONE,
-                        "Your hours have been logged!",
-                        ButtonType.OK);
-                userPrompt.show();
-            });
-
-        }
-
+    public void volunteerCheckIO() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
         ds.setURL(connectionString);
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-        ResultSet rsTasks = statement.executeQuery("select distinct Task from Events");
-        while (rsTasks.next()) {
-            cboTasks.getItems().add(rsTasks.getString(1));
-        }
+        refreshCenterPane(centerPane);
 
-        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
-        while (rsLocation.next()) {
-            cboLocation.getItems().add(rsLocation.getString(1));
+        SimpleDateFormat time = new SimpleDateFormat("hh:mm");
+        String timeNow = time.format(new Date());
+        Label timeLbl = new Label(timeNow);
+        SimpleDateFormat date = new SimpleDateFormat("yyyy/MM/dd");
+        String todaysDate = date.format(new Date());
+        Label dateLbl = new Label(todaysDate);
+        ComboBox<String> cboTasks = new ComboBox<>();
+        ComboBox<String> cboLocation = new ComboBox<>();
+        Button clockin = new Button("Check in");
+        clockin.setStyle(buttonStyle);
+        Button clockout = new Button("Check Out");
+        clockout.setStyle(buttonStyle);
+
+        pane.setTop(heading("Volunteer Check In or Out"));
+
+        centerPane.add(labelText("Todays Date: "), 0, 1);
+        centerPane.add(labelText("Current Time: "), 0, 2);
+        centerPane.add(labelText("Available Tasks: "), 0, 3);
+//        centerPane.add(labelText("Check-In Location: "), 0, 4);
+
+        centerPane.add(dateLbl, 1, 1);
+        centerPane.add(timeLbl, 1, 2);
+        centerPane.add(cboTasks, 1, 3);
+        centerPane.add(cboLocation, 1, 4);
+        centerPane.add(clockin, 0, 7);
+        centerPane.add(clockout, 0, 8);
+
+        ResultSet rsTasks = statement.executeQuery("select taskid, description, location, Mileage from Tasks");
+        while (rsTasks.next()) {
+            int taskID = rsTasks.getInt(1);
+            String des = rsTasks.getString(2);
+            String loc = rsTasks.getString(3);
+            String mil = rsTasks.getString(4);
+            String taskInfo = taskID + " | " + des + " | " + loc + " | " + mil;
+            cboTasks.getItems().add(taskInfo);
+
+//        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
+//        while (rsLocation.next()) {
+//            cboLocation.getItems().add(rsLocation.getString(1));
+//        }
+            Shifts newShift = new Shifts();
+            clockin.setOnAction(e -> {
+                String selectedTask = cboTasks.getSelectionModel().getSelectedItem();
+                String[] info = selectedTask.split(" ");
+                String id = info[0];
+                newShift.setVolID(loggedInVolID);
+                newShift.setTimeIn(timeNow);
+                newShift.setTimeOut("None");
+                newShift.setDate(todaysDate);
+                newShift.setTaskID(Integer.valueOf(id));
+//            Shifts newShift = new Shifts(
+                System.out.println(newShift);
+                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID)"
+                        + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd')," + newShift.taskID + ")";
+                try {
+                    statement.executeQuery(sqlQuery);
+                    statement.executeQuery("commit");
+                } catch (SQLException ex) {
+                }
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("You are clocked in!");
+                alert.showAndWait();
+
+            });
         }
+        clockout.setOnAction(e -> {
+            String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
+                    + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+            try {
+                statement.executeQuery(sqlQuery);
+                statement.executeQuery("commit");
+            } catch (SQLException ex) {
+            }
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setHeaderText("You are clocked out!");
+            alert.showAndWait();
+        });
 
         addBackButton();
     }
 
-    public void logEvent() throws SQLException {
+    public void logTask() throws SQLException {
         ComboBox<String> cboLocation = new ComboBox<>();
         TextField txtMileage = new TextField();
-        ComboBox<Integer> cboMaxV = new ComboBox<>();
-        cboMaxV.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        ComboBox<String> cboTask = new ComboBox<>();
+        ComboBox<Integer> maxVol = new ComboBox<>();
+        maxVol.getItems().addAll(1, 2, 3, 4, 5);
+        ComboBox<String> cboDescription = new ComboBox<>();
 
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -689,7 +675,7 @@ public class capstoneRedo2 extends Application {
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
         try {
-            String query = "Select distinct location from events";
+            String query = "Select distinct location from tasks";
             ResultSet rsLocation = statement.executeQuery(query);
             while (rsLocation.next()) {
                 cboLocation.getItems().add(rsLocation.getString("location"));
@@ -697,107 +683,78 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
         try {
-            String query = "Select distinct task from events";
+            String query = "Select distinct description from tasks";
             ResultSet rsTasks = statement.executeQuery(query);
             while (rsTasks.next()) {
-                cboTask.getItems().add(rsTasks.getString("task"));
+                cboDescription.getItems().add(rsTasks.getString("description"));
             }
         } catch (SQLException ex) {
         }
 
-//        cboLocation.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-
-//            @Override
-//            public void changed(ObservableValue ov, Object t, Object t1) {
-//                switch (t1.toString()) {
-//                    case "":
-//                        txtMileage.setText(" ");
-//                        break;
-//                    case "Charlottesville":
-//                        txtMileage.setText("62");
-//                        break;
-//                    case "Luray":
-//                        txtMileage.setText("33");
-//                        break;
-//                    case "Lynchburg":
-//                        txtMileage.setText("97");
-//                        break;
-//                    case "Richmond":
-//                        txtMileage.setText("130");
-//                        break;
-//                    case "Washington":
-//                        txtMileage.setText("132");
-//                        break;
-//                }
-//            }
-//        });
-
         refreshCenterPane(centerPane);
 
-        pane.setTop(heading("LOG EVENT"));
-        Button submitEvent = new Button("Submit Event!");
+        pane.setTop(heading("Create A New Task"));
+        Button submitEvent = new Button("Submit Task!");
         cboLocation.setEditable(true);
-        cboTask.setEditable(true);
+        cboDescription.setEditable(true);
 
-        centerPane.add(labelText("Location:"), 0, 0);
-        centerPane.add(cboLocation, 1, 0);
-        centerPane.add(labelText("Mileage:"), 0, 1);
-        centerPane.add(txtMileage, 1, 1);
-        centerPane.add(labelText("Task:"), 0, 2);
-        centerPane.add(cboTask, 1, 2);
+        centerPane.add(labelText("Description:"), 0, 0);
+        centerPane.add(cboDescription, 1, 0);
+        centerPane.add(labelText("Location:"), 0, 1);
+        centerPane.add(cboLocation, 1, 1);
+        centerPane.add(labelText("Mileage:"), 0, 2);
+        centerPane.add(txtMileage, 1, 2);
         centerPane.add(labelText("Maximum Volunteers"), 0, 3);
-        centerPane.add(cboMaxV, 1, 3);
+        centerPane.add(maxVol, 1, 3);
         centerPane.add(submitEvent, 1, 4);
         submitEvent.setStyle(buttonStyle);
         addBackButton();
-        String query = "Select * from events";
+        String query = "Select * from tasks";
         try {
             try (ResultSet rsEvents = statement.executeQuery(query)) {
                 while (rsEvents.next()) { //get database data
-                    Event dbEvent = new Event();
-                    dbEvent.setEventID(rsEvents.getInt(1));
-                    dbEvent.setLocation(rsEvents.getString(1));
-                    dbEvent.setMileage(rsEvents.getString(2));
-                    dbEvent.setTask(rsEvents.getString(4));
-                    dbEvent.setMaxVolunteers(rsEvents.getInt(5));
+                    Task dbTask = new Task();
+                    dbTask.setTaskID(rsEvents.getInt(1));
+                    dbTask.setDescription(rsEvents.getString(1));
+                    dbTask.setLocation(rsEvents.getString(2));
+                    dbTask.setMileage(rsEvents.getString(4));
+                    dbTask.setMaxVolunteers(rsEvents.getInt(5));
                 }
             }
         } catch (SQLException ex) {
         }
-        
+
         submitEvent.setOnAction((ActionEvent e) -> {
             //give error if information isn't complete
-            if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || cboMaxV.getValue() == null) {
+            if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || maxVol.getValue() == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("Please enter all event information");
                 alert.showAndWait();
             } else {
                 try {
-                    Event submittedEvent = new Event(
+                    Task submittedTask = new Task(
+                            cboDescription.getValue(),
                             cboLocation.getValue(),
                             txtMileage.getText(),
-                            cboTask.getValue(),
-                            cboMaxV.getValue()
+                            maxVol.getValue()
                     );
-                    //System.out.println(submittedEvent);
-                    String insert = "INSERT INTO EVENTS (EventID, Location, Mileage, Task, MaxVolunteers) VALUES (" + submittedEvent.eventID + ", '"
-                            + cboLocation.getValue() + "', '" + txtMileage.getText() + "', '" + cboTask.getValue() + "', '"
-                            + cboMaxV.getValue() + "')";
+                    System.out.println(submittedTask);
+                    String insert = "INSERT INTO TASKS (TaskID, Description, Location, Mileage, MaxVolunteers) VALUES (" + submittedTask.taskID + ", '"
+                            + cboDescription.getValue() + "', '" + cboLocation.getValue() + "', '" + txtMileage.getText() + "', "
+                            + maxVol.getValue() + ")";
                     statement.execute(insert);
                     statement.execute("commit");
-
-                    //clear text fields after submission
+//clear text fields after submission
                     cboLocation.setValue(null);
                     txtMileage.setText("");
-                    cboTask.setValue(null);
-                    cboMaxV.setValue(null);
-
+                    cboDescription.setValue(null);
+                    maxVol.setValue(null);
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Event Logged, \n"
+                    alert.setHeaderText("Task Created, \n"
                             + "Thank You For Your Help!");
                     alert.showAndWait();
-
                 } catch (SQLException ex) {
+
                 }
             }
         }
@@ -1121,7 +1078,7 @@ public class capstoneRedo2 extends Application {
 
         // Adding a new animal action
         addAnimal.setOnAction(e -> {
-            
+
             refreshCenterPane(centerPane);
             pane.setTop(heading("Add a New Animal"));
             centerPane.add(lblName, 0, 2);
@@ -1141,14 +1098,14 @@ public class capstoneRedo2 extends Application {
             centerPane.add(saveButton, 0, 10);
             pane.setBottom(backAnimals);
             saveButton.setOnAction(ee -> {
-            //give error if any fields are empty
-            if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() ||cboAge.getValue() == null
-                    || cboGender.getValue() == null || cboWeight.getValue() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please Enter All Animal Information");
-                alert.showAndWait();
-            } else {
- //               try {
+                //give error if any fields are empty
+                if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || cboAge.getValue() == null
+                        || cboGender.getValue() == null || cboWeight.getValue() == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please Enter All Animal Information");
+                    alert.showAndWait();
+                } else {
+                    //               try {
 //                    Animal submittedAnimal = new Animal( //create new animal
 //                            txtName.getText(),
 //                            cboSpecies.getValue(),
@@ -1182,14 +1139,13 @@ public class capstoneRedo2 extends Application {
 //                    Logger.getLogger(capstoneRedo2.class
 //                            .getName()).log(Level.SEVERE, null, ex);
 //                }
-            }
-        });
-                
+                }
             });
-            
-            pane.setBottom(backAnimals);
 
-        
+        });
+
+        pane.setBottom(backAnimals);
+
         // Inital page
         String selectSql = "select * from animals";
         try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
@@ -1235,7 +1191,6 @@ public class capstoneRedo2 extends Application {
                         + weight + " " + Status; //combining into one string to add to the combobox
 
                 cboAnimal.getItems().add(name); // populate combobox for animals
-                
 
                 //getting the db data into the table view
                 ObservableList<String> row = FXCollections.observableArrayList();
