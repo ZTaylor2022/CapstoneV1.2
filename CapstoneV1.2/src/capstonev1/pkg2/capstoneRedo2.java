@@ -107,7 +107,6 @@ public class capstoneRedo2 extends Application {
 
     // animal functions
     Button updateStatus = new Button("Update Status");
-    Button animalCheck = new Button("Check In / Out");
     Button addAnimal = new Button("Add Animal");
     Button saveButton = new Button("Save");
     ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
@@ -678,7 +677,7 @@ try {
             String des = rsTasks.getString(2);
             String loc = rsTasks.getString(3);
             String mil = rsTasks.getString(4);
-            String taskInfo = "Task ID: " + taskID + "\n" + des + "\nLocation: " + loc + ", \n" + mil + " Miles away";
+            String taskInfo = "Task ID: " + taskID + "\n " + des + "\n Location: " + loc + ", \n " + mil + " Miles away";
             cboTasks.getItems().add(taskInfo);
 
 //        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
@@ -1095,7 +1094,7 @@ try {
         pane.setTop(heading("Current Animals"));
 
         HBox bottom = new HBox();
-        bottom.getChildren().addAll(addAnimal, updateStatus, animalCheck);
+        bottom.getChildren().addAll(addAnimal, updateStatus);
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
@@ -1180,16 +1179,7 @@ try {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-        // 'Check In / Out' Button
-        // takes you to animalCheck()
-        animalCheck.setOnAction(e -> {
-            try {
-                animalCheck();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+       
 
         bottom.setAlignment(Pos.CENTER);
 
@@ -1365,41 +1355,7 @@ try {
         }
     }
 
-    public void animalCheck() throws SQLException {
-        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-        ds.setURL(connectionString);
-        Connection con = ds.getConnection("javauser", "javapass");
-        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-        refreshCenterPane(centerPane);
-        cboAnimal.setValue(null);
-
-        SimpleDateFormat time = new SimpleDateFormat("hh:mm aa");
-        String timeNow = time.format(new Date());
-        Label timeLbl = new Label(timeNow);
-        SimpleDateFormat date = new SimpleDateFormat("yyyy/MM/dd");
-        String todaysDate = date.format(new Date());
-        Label dateLbl = new Label(todaysDate);
-        Button clockin = new Button("Check in");
-        clockin.setStyle(buttonStyle);
-        Button clockout = new Button("Check Out");
-        clockout.setStyle(buttonStyle);
-        pane.setTop(heading("Animal Check In / Out"));
-
-        centerPane.add(labelText("Todays Date: "), 0, 1);
-        centerPane.add(labelText("Current Time: "), 0, 2);
-        centerPane.add(labelText("Select Animal: "), 0, 3);
-        centerPane.add(labelText("Select : "), 0, 4);
-
-        centerPane.add(dateLbl, 1, 1);
-        centerPane.add(timeLbl, 1, 2);
-        centerPane.add(cboAnimal, 1, 3);
-        centerPane.add(clockin, 0, 7);
-        centerPane.add(clockout, 1, 7);
-
-        pane.setBottom(backAnimals);
-
-    }
+  
 
     public static void main(String[] args) {
         launch(args);
