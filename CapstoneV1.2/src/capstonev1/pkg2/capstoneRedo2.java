@@ -642,9 +642,6 @@ public class capstoneRedo2 extends Application {
         clockin.setStyle(buttonStyle);
         Button clockout = new Button("Check Out");
         clockout.setStyle(buttonStyle);
-        TableView tableTask = new TableView();
-        
-        
 
         pane.setTop(heading("Volunteer Check In or Out"));
 
@@ -660,13 +657,13 @@ public class capstoneRedo2 extends Application {
         centerPane.add(cboAnimal, 1, 4);
         centerPane.add(clockin, 0, 7);
         centerPane.add(clockout, 1, 7);
-try {
+        try {
             String query = "select animalID, name from animals";
             ResultSet rsAnimal = statement.executeQuery(query);
             while (rsAnimal.next()) {
                 int animalID = rsAnimal.getInt(1);
                 String animalName = rsAnimal.getString(2);
-                String animalInfo = "ID: " + animalID + "\nName: " + animalName;
+                String animalInfo = "ID: " + animalID + " \nName: " + animalName;
                 cboAnimal.getItems().add(animalInfo);
             }
         } catch (SQLException ex) {
@@ -677,7 +674,7 @@ try {
             String des = rsTasks.getString(2);
             String loc = rsTasks.getString(3);
             String mil = rsTasks.getString(4);
-            String taskInfo = "Task ID: " + taskID + "\n " + des + "\n Location: " + loc + ", \n " + mil + " Miles away";
+            String taskInfo = "Task ID: " + taskID + " \n" + des + "\nLocation: " + loc + ",\n" + mil + " Miles away";
             cboTasks.getItems().add(taskInfo);
 
 //        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
@@ -687,19 +684,24 @@ try {
             Shifts newShift = new Shifts();
             clockin.setOnAction(e -> {
                 String selectedTask = cboTasks.getSelectionModel().getSelectedItem();
-                String[] info = selectedTask.split(" ");
-                String id = info[0];
+                String[] tasks = selectedTask.split(" ");
+                String tID = tasks[2];
+
+                String selectedAnimal = cboAnimal.getSelectionModel().getSelectedItem();
+                String[] animals = selectedAnimal.split(" ");
+                String aID = animals[1];
+
                 newShift.setVolID(loggedInVolID);
                 newShift.setTimeIn(timeNow);
-                newShift.setTimeOut("None");
+                newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setTaskID(Integer.valueOf(id));
-            //   newShift.setAnimalID(Integer.valueOf(animalID);
+                newShift.setTaskID(Integer.valueOf(tID));
+                newShift.setAniamlID(Integer.valueOf(aID));
 //            Shifts newShift = new Shifts(
                 System.out.println(newShift);
-                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID)"
+                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd')," + newShift.taskID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -1089,7 +1091,6 @@ try {
 
         refreshCenterPane(centerPane);
         tableHome.getItems().clear();
-        
 
         pane.setTop(heading("Current Animals"));
 
@@ -1179,14 +1180,12 @@ try {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-       
 
         bottom.setAlignment(Pos.CENTER);
 
         bottom.setSpacing(10);
         hbox1.setAlignment(Pos.CENTER);
 
-        
         centerPane.add(tableHome, 0, 1);
         centerPane.add(bottom, 0, 3);
         pane.setCenter(centerPane);
@@ -1279,7 +1278,7 @@ try {
         TextField age = new TextField();
         TextField gender = new TextField();
         TextField weight = new TextField();
-        
+
         //  TextField id = new TextField();
         name.setEditable(false);
         spec.setEditable(false);
@@ -1291,7 +1290,7 @@ try {
         ComboBox<String> animal = new ComboBox<>();
         TextField status = new TextField();
         status.setEditable(false);
-        
+
         updateA.setStyle(buttonStyle);
         try {
             String query = "Select distinct status from animals where status ='Ready for adoption'";
@@ -1306,7 +1305,7 @@ try {
         while (rsEval.next()) {
             int aId = rsEval.getInt(1);
             String aName = rsEval.getString(2);
-            String animalInfo = aId + "\n Name: " + aName;
+            String animalInfo = "ID: " + aId + " \nName: " + aName;
             animal.getItems().add(animalInfo);
 
             refreshCenterPane(centerPane);
@@ -1318,26 +1317,23 @@ try {
             top.getChildren().addAll(labelText("Select Animal Being Evaluated: \t"), animal);
             HBox hbox = new HBox();
             hbox.getChildren().addAll(labelText("Updated Status: \t"), status);
-            
 
             updateA.setOnAction(e -> {
                 try {
                     //code to update sql database when button is clicked
                     String selectedAnimal = animal.getSelectionModel().getSelectedItem();
                     String[] info = selectedAnimal.split(" ");
-                    String id = info[0];
-                    String selectedStatus = status.getText();
-                    String sql = "update animals set status= '" + selectedStatus + "' "
-                            + "where animalID " + id;
+                    String id = info[1];
+                    String sql = "update animals set status= '" + status.getText() + "' "
+                            + "where animalID = " + id;
                     statement.executeQuery(sql);
-                    
 
                 } catch (SQLException ex) {
                     Logger.getLogger(capstoneRedo2.class
                             .getName()).log(Level.SEVERE, null, ex);
                 }
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                alert.setHeaderText("Animal Ready For Adoption!");
+                alert.setHeaderText("Animal Is Ready For Adoption!");
                 alert.showAndWait();
             });
 
@@ -1354,8 +1350,6 @@ try {
             pane.setCenter(centerPane);
         }
     }
-
-  
 
     public static void main(String[] args) {
         launch(args);
