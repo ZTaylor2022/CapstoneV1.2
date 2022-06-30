@@ -110,6 +110,8 @@ public class capstoneRedo2 extends Application {
     TableView tableHome = new TableView();
     ComboBox<String> cboStatus = new ComboBox<>();
     ComboBox<String> cboAnimal = new ComboBox<>();
+    
+    Shifts newShift = new Shifts();
 
     @Override
     public void start(Stage primaryStage) throws SQLException {
@@ -694,8 +696,23 @@ public class capstoneRedo2 extends Application {
         clockout.setOnAction(e -> {
             String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
                     + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+            newShift.setTimeOut(timeNow);
             try {
                 statement.executeQuery(sqlQuery);
+                String timeIn = newShift.getTimeIn();
+                System.out.println(timeIn);
+                String timeOut = newShift.getTimeOut();
+                System.out.println(timeOut);
+                String[] timeInSArray = timeIn.split(":");
+                String[] timeOutSArray = timeOut.split(":");
+                double[] timeInArray = {Double.parseDouble(timeInSArray[0]),Double.parseDouble(timeInSArray[1])};
+                double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]),Double.parseDouble(timeOutSArray[1])};
+                timeInArray[1] = timeInArray[1]/60;
+                timeOutArray[1] = timeOutArray[1]/60;
+                double timeInHours = timeInArray[0] + timeInArray[1];
+                double timeOutHours = timeOutArray[0] + timeOutArray[1];
+                double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
+                //query to insert total hours into table... total hours column in table
                 statement.executeQuery("commit");
             } catch (SQLException ex) {
             }
