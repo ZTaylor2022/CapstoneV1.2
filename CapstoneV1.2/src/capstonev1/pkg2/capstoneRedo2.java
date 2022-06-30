@@ -1219,6 +1219,7 @@ public class capstoneRedo2 extends Application {
         Label lblGender = new Label("Enter Gender");
         Label lblStatus = new Label("Animal Status");
         cboGender.getItems().addAll("Male", "Female");
+        cboSpecies.setEditable(true);
        
         pane.setTop(heading("Add a New Animal"));
         centerPane.add(lblName, 0, 2);
@@ -1237,6 +1238,12 @@ public class capstoneRedo2 extends Application {
         centerPane.add(txtStatus, 1, 8);
         centerPane.add(saveButton, 0, 10);
         pane.setBottom(backAnimals);
+        
+      ResultSet rsSpecies = statement.executeQuery("select distinct species from animals");
+        while (rsSpecies.next()) {
+            
+            String species = rsSpecies.getString(1);
+            cboSpecies.getItems().add(species);
 
         saveButton.setOnAction(ee -> {
             //give error if any fields are empty
@@ -1281,6 +1288,7 @@ public class capstoneRedo2 extends Application {
                 }
             }
         });
+    }
     }
 
     public void updateAnimal() throws SQLException {
