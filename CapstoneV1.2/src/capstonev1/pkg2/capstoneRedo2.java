@@ -1213,17 +1213,6 @@ public class capstoneRedo2 extends Application {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-        // 'Check In / Out' Button
-        // takes you to animalCheck()
-        animalCheck.setOnAction(e -> {
-            try {
-                animalCheck();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-
     }
 
     public void addAnimals() throws SQLException {
