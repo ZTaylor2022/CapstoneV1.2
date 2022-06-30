@@ -1091,7 +1091,6 @@ try {
         refreshCenterPane(centerPane);
         tableHome.getItems().clear();
         
-
         pane.setTop(heading("Current Animals"));
 
         HBox bottom = new HBox();
