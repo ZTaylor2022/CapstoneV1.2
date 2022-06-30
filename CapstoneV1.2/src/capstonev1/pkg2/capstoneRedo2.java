@@ -711,6 +711,8 @@ public class capstoneRedo2 extends Application {
             alert.setHeaderText("You are clocked out!");
             alert.showAndWait();
         });
+        
+        pane.setCenter(centerPane);
 
         addBackButton();
     }
