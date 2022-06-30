@@ -106,12 +106,11 @@ public class capstoneRedo2 extends Application {
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
 
-
     Button saveButton = new Button("Save");
     TableView tableHome = new TableView();
     ComboBox<String> cboStatus = new ComboBox<>();
     ComboBox<String> cboAnimal = new ComboBox<>();
-    
+
     Shifts newShift = new Shifts();
 
     @Override
@@ -133,7 +132,7 @@ public class capstoneRedo2 extends Application {
 
         // Animal functions
         saveButton.setStyle(buttonStyle);
-        
+
         backAnimals.setOnAction(e -> {
             try {
                 viewAnimals();
@@ -149,7 +148,7 @@ public class capstoneRedo2 extends Application {
 //                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
 //                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
 //                41, 42, 43, 44, 45, 46, 47, 48, 49, 50);
-        
+
         //cboWeight.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 //                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 //                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -676,7 +675,7 @@ public class capstoneRedo2 extends Application {
                 System.out.println(newShift);
                 String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" +newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" + newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -692,40 +691,50 @@ public class capstoneRedo2 extends Application {
             DecimalFormat df = new DecimalFormat("0.00");
             String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
                     + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-            String sqlSelect = "select timeIn from shifts " +
-                    "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')"; 
+            String sqlSelect = "select timeIn from shifts "
+                    + "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
             newShift.setTimeOut(timeNow);
             try {
                 statement.executeQuery(sqlQuery);
                 ResultSet rs = statement.executeQuery(sqlSelect);
-                while (rs.next()){
+                while (rs.next()) {
                     String timeIn = rs.getString(1);
-                System.out.println(timeIn);
-                String timeOut = newShift.getTimeOut();
-                String[] timeInSArray = timeIn.split(":");
-                String[] timeOutSArray = timeOut.split(":");
-                double[] timeInArray = {Double.parseDouble(timeInSArray[0]),Double.parseDouble(timeInSArray[1])};
-                double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]),Double.parseDouble(timeOutSArray[1])};
-                timeInArray[1] = timeInArray[1]/60;
-                timeOutArray[1] = timeOutArray[1]/60;
-                double timeInHours = timeInArray[0] + timeInArray[1];
-                double timeOutHours = timeOutArray[0] + timeOutArray[1];
-                double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
-                
-                System.out.println(totalHours);
-                //query to insert total hours into table... total hours column in table
-                String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
-                    + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-                statement.executeQuery(query);
-                statement.executeQuery("commit");
+                    System.out.println(timeIn);
+                    String timeOut = newShift.getTimeOut();
+                    String[] timeInSArray = timeIn.split(":");
+                    String[] timeOutSArray = timeOut.split(":");
+                    double[] timeInArray = {Double.parseDouble(timeInSArray[0]), Double.parseDouble(timeInSArray[1])};
+                    double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]), Double.parseDouble(timeOutSArray[1])};
+                    timeInArray[1] = timeInArray[1] / 60;
+                    timeOutArray[1] = timeOutArray[1] / 60;
+                    double timeInHours = timeInArray[0] + timeInArray[1];
+                    double timeOutHours = timeOutArray[0] + timeOutArray[1];
+                    double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
+
+                    System.out.println(totalHours);
+                    //query to insert total hours into table... total hours column in table
+                    String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
+                            + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+                    statement.executeQuery(query);
+                    statement.executeQuery("commit");
+
+                    String ytdHours = "select SUM(totalHours)" + " from shifts "
+                            + "where volunteerid = " + loggedInVolID;
+                    ResultSet rsHours = statement.executeQuery(ytdHours);
+                    while (rsHours.next()) {
+                        double hours = rsHours.getDouble(1);
+                        String updateVTable = "update volunteers set hours = " + df.format(hours)
+                                + " where volunteerid = " + loggedInVolID;
+                        statement.executeQuery(updateVTable);
+                    }
                 }
-                } catch (SQLException ex) {
+            } catch (SQLException ex) {
             }
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setHeaderText("You are clocked out!");
             alert.showAndWait();
         });
-        
+
         pane.setCenter(centerPane);
 
         addBackButton();
@@ -1098,7 +1107,6 @@ public class capstoneRedo2 extends Application {
         tableHome.getItems().clear();
 
         pane.setTop(heading("Current Animals"));
-        
 
         HBox bottom = new HBox();
         bottom.getChildren().addAll(addAnimal, updateStatus);
@@ -1231,10 +1239,10 @@ public class capstoneRedo2 extends Application {
         ComboBox<String> cboGender = new ComboBox<>();
         TextField txtAge = new TextField();
         TextField txtWeight = new TextField();
-        TextField txtName = new TextField(); 
+        TextField txtName = new TextField();
         TextField txtBreed = new TextField();
         TextField txtStatus = new TextField("Evaluating for adoption");
-        
+
         Label lblName = new Label("Enter Animal Name");
         Label lblSpecies = new Label("Enter Species");
         Label lblBreed = new Label("Enter Animal Breed");
@@ -1244,7 +1252,7 @@ public class capstoneRedo2 extends Application {
         Label lblStatus = new Label("Animal Status");
         cboGender.getItems().addAll("Male", "Female");
         cboSpecies.setEditable(true);
-       
+
         pane.setTop(heading("Add a New Animal"));
         centerPane.add(lblName, 0, 2);
         centerPane.add(txtName, 1, 2);
@@ -1262,57 +1270,57 @@ public class capstoneRedo2 extends Application {
         centerPane.add(txtStatus, 1, 8);
         centerPane.add(saveButton, 0, 10);
         pane.setBottom(backAnimals);
-        
-      ResultSet rsSpecies = statement.executeQuery("select distinct species from animals");
+
+        ResultSet rsSpecies = statement.executeQuery("select distinct species from animals");
         while (rsSpecies.next()) {
-            
+
             String species = rsSpecies.getString(1);
             cboSpecies.getItems().add(species);
 
-        saveButton.setOnAction(ee -> {
-            //give error if any fields are empty
-            if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || txtAge.getText() == null
-                    || cboGender.getValue() == null || txtWeight.getText() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please Enter All Animal Information");
-                alert.showAndWait();
-            } else {
-                try {
-                    Animal submittedAnimal = new Animal( //create new animal
-                            txtName.getText(),
-                            cboSpecies.getValue(),
-                            txtBreed.getText(),
-                            Integer.valueOf(txtAge.getText()),
-                            cboGender.getValue(),
-                            Integer.valueOf(txtWeight.getText()),
-                            txtStatus.getText()
-                    );
-                    String insert = "Insert into Animals (animalID, Name, Species, Breed, Age, Gender, Weight, Status) VALUES (" + submittedAnimal.animalID + ", '"
-                            + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', "
-                            + txtAge.getText() + ", '" + cboGender.getValue() + "', " + txtWeight.getText() + ", '" + txtStatus.getText() + "')";
-                    statement.execute(insert);
-                    statement.execute("commit");
-
-                    //clear text fields after submission
-                    txtName.setText("");
-                    cboSpecies.setValue(null);
-                    txtBreed.setText("");
-                    txtAge.setText("");
-                    cboGender.setValue(null);
-                    txtWeight.setText("");
-                    txtStatus.setText("");
-
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Animal Added To System!");
+            saveButton.setOnAction(ee -> {
+                //give error if any fields are empty
+                if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || txtAge.getText() == null
+                        || cboGender.getValue() == null || txtWeight.getText() == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please Enter All Animal Information");
                     alert.showAndWait();
+                } else {
+                    try {
+                        Animal submittedAnimal = new Animal( //create new animal
+                                txtName.getText(),
+                                cboSpecies.getValue(),
+                                txtBreed.getText(),
+                                Integer.valueOf(txtAge.getText()),
+                                cboGender.getValue(),
+                                Integer.valueOf(txtWeight.getText()),
+                                txtStatus.getText()
+                        );
+                        String insert = "Insert into Animals (animalID, Name, Species, Breed, Age, Gender, Weight, Status) VALUES (" + submittedAnimal.animalID + ", '"
+                                + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', "
+                                + txtAge.getText() + ", '" + cboGender.getValue() + "', " + txtWeight.getText() + ", '" + txtStatus.getText() + "')";
+                        statement.execute(insert);
+                        statement.execute("commit");
 
-                } catch (SQLException ex) {
-                    Logger.getLogger(capstoneRedo2.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                        //clear text fields after submission
+                        txtName.setText("");
+                        cboSpecies.setValue(null);
+                        txtBreed.setText("");
+                        txtAge.setText("");
+                        cboGender.setValue(null);
+                        txtWeight.setText("");
+                        txtStatus.setText("");
+
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                        alert.setHeaderText("Animal Added To System!");
+                        alert.showAndWait();
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(capstoneRedo2.class
+                                .getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
     }
 
     public void updateAnimal() throws SQLException {
