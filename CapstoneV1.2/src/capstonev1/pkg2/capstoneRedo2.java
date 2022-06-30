@@ -104,10 +104,9 @@ public class capstoneRedo2 extends Application {
     Button report2 = new Button("Event Attendance");
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
-    
+
     // animal functions
     Button updateStatus = new Button("Update Status");
-    Button animalCheck = new Button("Check In / Out");
     Button addAnimal = new Button("Add Animal");
     Button saveButton = new Button("Save");
     ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
@@ -120,7 +119,7 @@ public class capstoneRedo2 extends Application {
     ComboBox<String> cboGender = new ComboBox<>();
     Label lblName = new Label("Enter Animal Name");
     TextField txtName = new TextField();
-    Label lblSpecies = new Label("Select Species");
+    Label lblSpecies = new Label("Enter Species");
     Label lblBreed = new Label("Enter Animal Breed");
     TextField txtBreed = new TextField();
     Label lblAge = new Label("Enter Animal Age");
@@ -131,6 +130,7 @@ public class capstoneRedo2 extends Application {
     Label lblStatus = new Label("Animal Status");
     TextField txtStatus = new TextField("Evaluating for adoption");
 
+    @Override
     public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
         welcomeModule();
@@ -146,11 +146,20 @@ public class capstoneRedo2 extends Application {
         report4.setStyle(reportButtonStyle);
 
         toolBar.getItems().addAll(report1, report2, report3, report4);
-        
+
         // Animal functions
         saveButton.setStyle(buttonStyle);
         cboGender.getItems().addAll("Male", "Female");
+        backAnimals.setOnAction(e -> {
+            try {
+                viewAnimals();
 
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+
+        });
         cboAge.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -283,15 +292,6 @@ public class capstoneRedo2 extends Application {
             }
         });
 
-        backAnimals.setOnAction(e -> {
-            try {
-                viewAnimals();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-
         appButton.setOnAction(e -> {
             try {
                 applicationScreen();
@@ -308,6 +308,8 @@ public class capstoneRedo2 extends Application {
         centerPane.add(userNameTF, 1, 1);
         centerPane.add(passwordTF, 1, 2);
         centerPane.add(loginButton, 1, 3);
+        centerPane.setVgap(5);
+
         centerPane.add(t, 1, 4); // temporary button to bypass login
 
         centerPane.add(subHeading("\n\n\nNEW VOLUNTEERS"), 0, 10);
@@ -628,6 +630,7 @@ public class capstoneRedo2 extends Application {
 
         refreshCenterPane(centerPane);
 
+
         SimpleDateFormat time = new SimpleDateFormat("HH:mm");
         String timeNow = time.format(new Date());
         Label timeLbl = new Label(timeNow);
@@ -635,6 +638,7 @@ public class capstoneRedo2 extends Application {
         String todaysDate = date.format(new Date());
         Label dateLbl = new Label(todaysDate);
         ComboBox<String> cboTasks = new ComboBox<>();
+        ComboBox<String> cboAnimal = new ComboBox<>();
         Button clockin = new Button("Check in");
         clockin.setStyle(buttonStyle);
         Button clockout = new Button("Check Out");
@@ -645,21 +649,33 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Todays Date: "), 0, 1);
         centerPane.add(labelText("Current Time: "), 0, 2);
         centerPane.add(labelText("Available Tasks: "), 0, 3);
+        centerPane.add(labelText("Animal Going: "), 0, 4);
 //        centerPane.add(labelText("Check-In Location: "), 0, 4);
 
         centerPane.add(dateLbl, 1, 1);
         centerPane.add(timeLbl, 1, 2);
         centerPane.add(cboTasks, 1, 3);
+        centerPane.add(cboAnimal, 1, 4);
         centerPane.add(clockin, 0, 7);
         centerPane.add(clockout, 1, 7);
-
+        try {
+            String query = "select animalID, name from animals";
+            ResultSet rsAnimal = statement.executeQuery(query);
+            while (rsAnimal.next()) {
+                int animalID = rsAnimal.getInt(1);
+                String animalName = rsAnimal.getString(2);
+                String animalInfo = "ID: " + animalID + " \nName: " + animalName;
+                cboAnimal.getItems().add(animalInfo);
+            }
+        } catch (SQLException ex) {
+        }
         ResultSet rsTasks = statement.executeQuery("select taskid, description, location, Mileage from Tasks");
         while (rsTasks.next()) {
             int taskID = rsTasks.getInt(1);
             String des = rsTasks.getString(2);
             String loc = rsTasks.getString(3);
             String mil = rsTasks.getString(4);
-            String taskInfo = taskID + " | " + des + " | " + loc + " | " + mil;
+            String taskInfo = "Task ID: " + taskID + " \n" + des + "\nLocation: " + loc + ",\n" + mil + " Miles away";
             cboTasks.getItems().add(taskInfo);
 
 //        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
@@ -669,18 +685,24 @@ public class capstoneRedo2 extends Application {
             Shifts newShift = new Shifts();
             clockin.setOnAction(e -> {
                 String selectedTask = cboTasks.getSelectionModel().getSelectedItem();
-                String[] info = selectedTask.split(" ");
-                String id = info[0];
+                String[] tasks = selectedTask.split(" ");
+                String tID = tasks[2];
+
+                String selectedAnimal = cboAnimal.getSelectionModel().getSelectedItem();
+                String[] animals = selectedAnimal.split(" ");
+                String aID = animals[1];
+
                 newShift.setVolID(loggedInVolID);
                 newShift.setTimeIn(timeNow);
-                newShift.setTimeOut("None");
+                newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setTaskID(Integer.valueOf(id));
+                newShift.setTaskID(Integer.valueOf(tID));
+                newShift.setAniamlID(Integer.valueOf(aID));
 //            Shifts newShift = new Shifts(
                 System.out.println(newShift);
-                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID)"
+                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd')," + newShift.taskID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -775,7 +797,7 @@ public class capstoneRedo2 extends Application {
             //give error if information isn't complete
             if (cboLocation.getValue() == null || txtMileage.getText().isEmpty() || maxVol.getValue() == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please enter all event information");
+                alert.setHeaderText("Please Enter All Task Information");
                 alert.showAndWait();
             } else {
                 try {
@@ -791,12 +813,12 @@ public class capstoneRedo2 extends Application {
                             + maxVol.getValue() + ")";
                     statement.execute(insert);
                     statement.execute("commit");
-//clear text fields after submission
+                    //clear text fields after submission
                     cboLocation.setValue(null);
                     txtMileage.setText("");
                     cboDescription.setValue(null);
                     maxVol.setValue(null);
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that task was submitted
                     alert.setHeaderText("Task Created, \n"
                             + "Thank You For Your Help!");
                     alert.showAndWait();
@@ -1061,7 +1083,7 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
     }
 
-   public void viewAnimals() throws SQLException {
+    public void viewAnimals() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
         ds.setURL(connectionString);
@@ -1069,14 +1091,16 @@ public class capstoneRedo2 extends Application {
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
         refreshCenterPane(centerPane);
+        tableHome.getItems().clear();
+
         pane.setTop(heading("Current Animals"));
 
-        HBox top = new HBox();
-        top.getChildren().addAll(addAnimal, updateStatus, animalCheck);
+        HBox bottom = new HBox();
+        bottom.getChildren().addAll(addAnimal, updateStatus);
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
-    
+
         // Inital page
         String selectSql = "select * from animals";
         try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
@@ -1094,7 +1118,8 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
 
-        try { // populating table with all animals
+        try {
+            // populating table with all animals
             String query = "Select * from animals";
             ResultSet rs = statement.executeQuery(query);
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
@@ -1108,14 +1133,15 @@ public class capstoneRedo2 extends Application {
                 });
                 tableHome.getColumns().addAll(col);
             }
+
             while (rs.next()) {
                 int AnimalID = rs.getInt(1);
                 String name = rs.getString(2); // getting first name from animals table
                 String species = rs.getString(3); // getting species from animals table
                 String breed = rs.getString(4); // getting breed from animals table
-                String age = rs.getString(5); // getting age from animals table
+                int age = rs.getInt(5); // getting age from animals table
                 String gender = rs.getString(6); // getting gender from animals table
-                String weight = rs.getString(7); // getting weight from animals table
+                int weight = rs.getInt(7); // getting weight from animals table
                 String Status = rs.getString(8); // getting status from animals table
                 String animalInfo = AnimalID + " " + name + " " + species + " "
                         + breed + " " + age + " " + gender + " "
@@ -1129,19 +1155,41 @@ public class capstoneRedo2 extends Application {
                     row.add(rs.getString(i));
                 }
                 data.add(row);
+
             }
             tableHome.setItems(data);
         } catch (SQLException ex) {
         }
       //  refreshCenterPane(centerPane);
 
-        top.setAlignment(Pos.CENTER);
+        // 'Add Animal' Button
+        // takes you to addAnimals()
+        addAnimal.setOnAction(e -> {
+            try {
+                addAnimals();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        // 'Update Animal' Button 
+        // takes you to updateAnimal()
+        updateStatus.setOnAction(e -> {
+            try {
+                updateAnimal();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
-        top.setSpacing(10);
+        bottom.setAlignment(Pos.CENTER);
+
+        bottom.setSpacing(10);
         hbox1.setAlignment(Pos.CENTER);
 
-        centerPane.add(top, 0, 1);
-        centerPane.add(tableHome, 0, 3);
+        centerPane.add(tableHome, 0, 1);
+        centerPane.add(bottom, 0, 3);
         pane.setCenter(centerPane);
 
         addBackButton();
@@ -1199,8 +1247,8 @@ public class capstoneRedo2 extends Application {
         centerPane.add(cboGender, 1, 6);
         centerPane.add(lblWeight, 0, 7);
         centerPane.add(cboWeight, 1, 7);
-        centerPane.add(lblStatus, 0, 9);
-        centerPane.add(txtStatus, 1, 9);
+        centerPane.add(lblStatus, 0, 8);
+        centerPane.add(txtStatus, 1, 8);
         centerPane.add(saveButton, 0, 10);
         pane.setBottom(backAnimals);
 
@@ -1222,7 +1270,7 @@ public class capstoneRedo2 extends Application {
                             cboWeight.getValue(),
                             txtStatus.getText()
                     );
-                    String insert = "Insert into Animals (animalID,Name,Species,BReed,Age,Gender,Weight,Status) VALUES (" + submittedAnimal.animalID + ", '"
+                    String insert = "Insert into Animals (animalID, Name, Species, Breed, Age, Gender, Weight, Status) VALUES (" + submittedAnimal.animalID + ", '"
                             + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', '"
                             + cboAge.getValue() + "', '" + cboWeight.getValue() + "', '" + txtStatus.getText() + "')";
                     statement.execute(insert);
@@ -1256,23 +1304,85 @@ public class capstoneRedo2 extends Application {
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-        refreshCenterPane(centerPane);
-        pane.setTop(heading("Update Animals Status"));
-        pane.setBottom(backAnimals);
+        // controlls
+        Button updateA = new Button("Update Animal Status");
+        TextField name = new TextField();
+        TextField spec = new TextField();
+        TextField breed = new TextField();
+        TextField age = new TextField();
+        TextField gender = new TextField();
+        TextField weight = new TextField();
 
-    }
+        //  TextField id = new TextField();
+        name.setEditable(false);
+        spec.setEditable(false);
+        breed.setEditable(false);
+        age.setEditable(false);
+        gender.setEditable(false);
+        weight.setEditable(false);
+        //  id.setEditable(false);
+        ComboBox<String> animal = new ComboBox<>();
+        TextField status = new TextField();
+        status.setEditable(false);
 
-    public void animalCheck() throws SQLException {
-        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-        ds.setURL(connectionString);
-        Connection con = ds.getConnection("javauser", "javapass");
-        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        updateA.setStyle(buttonStyle);
+        try {
+            String query = "Select distinct status from animals where status ='Ready for adoption'";
+            ResultSet rsSpecializations = statement.executeQuery(query);
+            while (rsSpecializations.next()) {
+                status.setText(rsSpecializations.getString("status"));
+            }
+        } catch (SQLException ex) {
+        }
 
-        refreshCenterPane(centerPane);
-        pane.setTop(heading("Animal Check In / Out"));
-        pane.setBottom(backAnimals);
+        ResultSet rsEval = statement.executeQuery("select animalId, Name from Animals where status= 'Evaluating for adoption'");
+        while (rsEval.next()) {
+            int aId = rsEval.getInt(1);
+            String aName = rsEval.getString(2);
+            String animalInfo = "ID: " + aId + " \nName: " + aName;
+            animal.getItems().add(animalInfo);
 
+            refreshCenterPane(centerPane);
+
+            pane.setTop(heading("Ready For Adoption Update"));
+            //animal.setItems(animalInfo);
+            VBox root = new VBox();
+            HBox top = new HBox();
+            top.getChildren().addAll(labelText("Select Animal Being Evaluated: \t"), animal);
+            HBox hbox = new HBox();
+            hbox.getChildren().addAll(labelText("Updated Status: \t"), status);
+
+            updateA.setOnAction(e -> {
+                try {
+                    //code to update sql database when button is clicked
+                    String selectedAnimal = animal.getSelectionModel().getSelectedItem();
+                    String[] info = selectedAnimal.split(" ");
+                    String id = info[1];
+                    String sql = "update animals set status= '" + status.getText() + "' "
+                            + "where animalID = " + id;
+                    statement.executeQuery(sql);
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(capstoneRedo2.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Animal Is Ready For Adoption!");
+                alert.showAndWait();
+            });
+
+            HBox bottom = new HBox();
+            bottom.getChildren().add(updateA);
+
+            root.getChildren().addAll(top, hbox, bottom);
+            hbox.setSpacing(10);
+            root.setSpacing(10);
+            centerPane.add(root, 0, 0);
+            centerPane.setHgap(10.0);
+            centerPane.setVgap(10.0);
+            pane.setBottom(backAnimals);
+            pane.setCenter(centerPane);
+        }
     }
 
     public static void main(String[] args) {
