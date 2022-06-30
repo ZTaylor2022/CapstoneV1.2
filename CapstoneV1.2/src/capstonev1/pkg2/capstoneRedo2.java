@@ -63,6 +63,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
@@ -104,7 +105,7 @@ public class capstoneRedo2 extends Application {
     Button report2 = new Button("Event Attendance");
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
-    
+
     // animal functions
     Button updateStatus = new Button("Update Status");
     Button animalCheck = new Button("Check In / Out");
@@ -146,7 +147,7 @@ public class capstoneRedo2 extends Application {
         report4.setStyle(reportButtonStyle);
 
         toolBar.getItems().addAll(report1, report2, report3, report4);
-        
+
         // Animal functions
         saveButton.setStyle(buttonStyle);
         cboGender.getItems().addAll("Male", "Female");
@@ -463,11 +464,12 @@ public class capstoneRedo2 extends Application {
     }
 
     public void homeScreen() {
+        GridPane leftPane = new GridPane();
+    
         pane.setTop(heading("Volunteer Home Screen"));
 
         Button checkInOut = new Button("Check In/Out");
         Button reportsButton = new Button("Reports Page");
-        Button socialButton = new Button("Social Page");
         Button logEventButton = new Button("Create A Task");
         Button assignSpecButton = new Button("Assign Specialization");
         Button applicationApproval = new Button("View Pending Applications");
@@ -475,7 +477,6 @@ public class capstoneRedo2 extends Application {
 
         checkInOut.setStyle(buttonStyle);
         reportsButton.setStyle(buttonStyle);
-        socialButton.setStyle(buttonStyle);
         logEventButton.setStyle(buttonStyle);
         assignSpecButton.setStyle(buttonStyle);
         applicationApproval.setStyle(buttonStyle);
@@ -483,17 +484,17 @@ public class capstoneRedo2 extends Application {
 
         refreshCenterPane(centerPane);
 
-        centerPane.add(subHeading("Please Choose From Menu"), 0, 0);
-        centerPane.add(checkInOut, 0, 1);
-        centerPane.add(applicationApproval, 0, 2);
-        centerPane.add(btnAnimals, 0, 3);
-        centerPane.add(assignSpecButton, 0, 4);
-        centerPane.add(logEventButton, 0, 5);
-        centerPane.add(reportsButton, 0, 6);
-        centerPane.add(socialButton, 0, 7);
+        leftPane.add(subHeading("Menu"), 0, 0);
+        leftPane.add(checkInOut, 0, 1);
+        leftPane.add(applicationApproval, 0, 2);
+        leftPane.add(btnAnimals, 0, 3);
+        leftPane.add(assignSpecButton, 0, 4);
+        leftPane.add(logEventButton, 0, 5);
+        leftPane.add(reportsButton, 0, 6);
 
         checkInOut.setOnAction(e -> {
             try {
+                pane.setLeft(null);
                 volunteerCheckIO();
 
             } catch (SQLException ex) {
@@ -503,6 +504,7 @@ public class capstoneRedo2 extends Application {
         });
         logEventButton.setOnAction(e -> {
             try {
+                pane.setLeft(null);
                 logTask();
 
             } catch (SQLException ex) {
@@ -510,9 +512,11 @@ public class capstoneRedo2 extends Application {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-        reportsButton.setOnAction(e -> reports());
+        reportsButton.setOnAction(e -> {pane.setLeft(null);
+        reports();});
         assignSpecButton.setOnAction(e -> {
             try {
+                pane.setLeft(null);
                 assignSpec();
 
             } catch (SQLException ex) {
@@ -522,6 +526,7 @@ public class capstoneRedo2 extends Application {
         });
         applicationApproval.setOnAction(e -> {
             try {
+                pane.setLeft(null);
                 applicationApproval();
 
             } catch (SQLException ex) {
@@ -532,6 +537,7 @@ public class capstoneRedo2 extends Application {
 
         btnAnimals.setOnAction(e -> {
             try {
+                pane.setLeft(null);
                 viewAnimals();
 
             } catch (SQLException ex) {
@@ -542,7 +548,8 @@ public class capstoneRedo2 extends Application {
         });
 
         centerPane.setVgap(8);
-        pane.setCenter(centerPane);
+        pane.setLeft(leftPane);
+        pane.setCenter(social());
 
     }
 
@@ -1061,7 +1068,7 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
     }
 
-   public void viewAnimals() throws SQLException {
+    public void viewAnimals() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
         ds.setURL(connectionString);
@@ -1076,7 +1083,6 @@ public class capstoneRedo2 extends Application {
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
-    
         // Inital page
         String selectSql = "select * from animals";
         try (ResultSet rsAnimals = statement.executeQuery(selectSql)) { //get all animals from db
@@ -1133,7 +1139,7 @@ public class capstoneRedo2 extends Application {
             tableHome.setItems(data);
         } catch (SQLException ex) {
         }
-      //  refreshCenterPane(centerPane);
+        //  refreshCenterPane(centerPane);
 
         top.setAlignment(Pos.CENTER);
 
@@ -1145,7 +1151,7 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
         addBackButton();
-           // 'Add Animal' Button
+        // 'Add Animal' Button
         // takes you to addAnimals()
         addAnimal.setOnAction(e -> {
             try {
@@ -1185,7 +1191,7 @@ public class capstoneRedo2 extends Application {
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         refreshCenterPane(centerPane);
-        
+
         pane.setTop(heading("Add a New Animal"));
         centerPane.add(lblName, 0, 2);
         centerPane.add(txtName, 1, 2);
@@ -1273,6 +1279,55 @@ public class capstoneRedo2 extends Application {
         pane.setTop(heading("Animal Check In / Out"));
         pane.setBottom(backAnimals);
 
+    }
+
+    public VBox social() {
+        refreshCenterPane(centerPane);
+
+        VBox socialFeed = new VBox();
+
+        //adds buttons/textfields
+        ListView<String> chatbox = new ListView<String>();
+        TextArea newMessage = new TextArea();
+        Button post = new Button("Post");
+        post.setStyle(buttonStyle);
+
+        //sets textfild and button sizes
+        chatbox.setPrefWidth(500);
+        newMessage.setPrefWidth(500);
+
+        //Messages
+        ObservableList<String> messages
+                = FXCollections.observableArrayList(
+                        "Brad Pitt: Is Anyone heading to Lynchburg tomorrow?",
+                        "Paula Larry: Yes, do you need a ride?",
+                        "Brad Pitt: Yes, can you pick me up at 118 Street Road at 9:00?",
+                        "Paula Larry: Sounds good, see you then!",
+                        "Abby Turner: Does anyone need extra grooming supplies?"
+                );
+
+        socialFeed.getChildren().add(subHeading("BARK Social"));
+        socialFeed.getChildren().add(chatbox);
+        socialFeed.getChildren().add(labelText("Add to the conversation!"));
+        socialFeed.getChildren().add(newMessage);
+        socialFeed.getChildren().add(post);
+
+        chatbox.setItems(messages);
+
+        post.setOnAction(e -> {
+            String postString = (this.user + ": " + newMessage.getText());
+            chatbox.getItems().add(postString);
+            newMessage.clear();
+        });
+
+        addBackButton();
+       
+       socialFeed.setPrefWidth(80);
+       socialFeed.setAlignment(Pos.CENTER);
+       socialFeed.setPadding(new Insets(10.0));
+       socialFeed.setSpacing(10.0);
+
+        return socialFeed;
     }
 
     public static void main(String[] args) {
