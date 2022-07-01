@@ -270,8 +270,6 @@ public class capstoneRedo2 extends Application {
         centerPane.add(userNameTF, 1, 1);
         centerPane.add(passwordTF, 1, 2);
         centerPane.add(loginButton, 1, 3);
-        centerPane.add(t, 1, 4); // temporary button to bypass login
-
         centerPane.add(subHeading("\n\n\nNEW VOLUNTEERS"), 0, 10);
         centerPane.add(appButton, 0, 11);
 
