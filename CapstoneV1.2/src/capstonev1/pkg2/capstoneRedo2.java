@@ -954,7 +954,7 @@ public class capstoneRedo2 extends Application {
                         + "application.applicationid");
                 String[] reportLabels = {"Volunteer ID","First Name","Last Name"};
                 reportBuilder2(3, reportRS, reportLabels);
-                pane.setTop(heading("Hours per Volunteer"));
+                pane.setTop(heading("List of Volunteers"));
             }
             if (selection == 2) {
                 ResultSet reportRS = statement.executeQuery("select * from shifts");
@@ -1044,7 +1044,7 @@ public class capstoneRedo2 extends Application {
 
         Button saveButton = new Button("Save");
         saveButton.setStyle(buttonStyle);
-        ObservableList status = FXCollections.observableArrayList("Accepted", "Declined");
+        ObservableList status = FXCollections.observableArrayList("Accept", "Decline");
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         TableView tableView = new TableView();
         ComboBox<String> statusCB = new ComboBox<>();
@@ -1106,7 +1106,7 @@ public class capstoneRedo2 extends Application {
                         String sql = "update application set status= '" + selectedDecision + "' "
                                 + "where applicationID= " + id;
                         statement.executeQuery(sql);
-                        if (selectedDecision.equals("Approved")) { //if the application status is changed to approved
+                        if (selectedDecision.equals("Accept")) { //if the application status is changed to approved
                             //Create new volunteer object
                             Volunteer newVolunteer = new Volunteer("Volunteer in Training", "None", 0.0, Integer.valueOf(id));
                             String sqlQuery = "insert into volunteers (volunteerid, title, specialization, hours, applicationid)"
