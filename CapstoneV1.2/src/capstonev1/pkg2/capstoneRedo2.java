@@ -1225,16 +1225,6 @@ public class capstoneRedo2 extends Application {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-        // 'Check In / Out' Button
-        // takes you to animalCheck()
-        animalCheck.setOnAction(e -> {
-            try {
-                animalCheck();
-            } catch (SQLException ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
 
     }
 
@@ -1246,6 +1236,24 @@ public class capstoneRedo2 extends Application {
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         refreshCenterPane(centerPane);
 
+        ComboBox<String> cboSpecies = new ComboBox<>();
+        ComboBox<String> cboGender = new ComboBox<>();
+        TextField txtAge = new TextField();
+        TextField txtWeight = new TextField();
+        TextField txtName = new TextField();
+        TextField txtBreed = new TextField();
+        TextField txtStatus = new TextField("Evaluating for adoption");
+
+        Label lblName = new Label("Enter Animal Name");
+        Label lblSpecies = new Label("Enter Species");
+        Label lblBreed = new Label("Enter Animal Breed");
+        Label lblAge = new Label("Enter Animal Age");
+        Label lblWeight = new Label("Enter Animal Weight (lbs)");
+        Label lblGender = new Label("Enter Gender");
+        Label lblStatus = new Label("Animal Status");
+        cboGender.getItems().addAll("Male", "Female");
+        cboSpecies.setEditable(true);
+
         pane.setTop(heading("Add a New Animal"));
         centerPane.add(lblName, 0, 2);
         centerPane.add(txtName, 1, 2);
@@ -1254,59 +1262,66 @@ public class capstoneRedo2 extends Application {
         centerPane.add(lblBreed, 0, 4);
         centerPane.add(txtBreed, 1, 4);
         centerPane.add(lblAge, 0, 5);
-        centerPane.add(cboAge, 1, 5);
+        centerPane.add(txtAge, 1, 5);
         centerPane.add(lblGender, 0, 6);
         centerPane.add(cboGender, 1, 6);
         centerPane.add(lblWeight, 0, 7);
-        centerPane.add(cboWeight, 1, 7);
-        centerPane.add(lblStatus, 0, 9);
-        centerPane.add(txtStatus, 1, 9);
+        centerPane.add(txtWeight, 1, 7);
+        centerPane.add(lblStatus, 0, 8);
+        centerPane.add(txtStatus, 1, 8);
         centerPane.add(saveButton, 0, 10);
         pane.setBottom(backAnimals);
 
-        saveButton.setOnAction(ee -> {
-            //give error if any fields are empty
-            if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || cboAge.getValue() == null
-                    || cboGender.getValue() == null || cboWeight.getValue() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Please Enter All Animal Information");
-                alert.showAndWait();
-            } else {
-                try {
-                    Animal submittedAnimal = new Animal( //create new animal
-                            txtName.getText(),
-                            cboSpecies.getValue(),
-                            txtBreed.getText(),
-                            cboAge.getValue(),
-                            cboGender.getValue(),
-                            cboWeight.getValue(),
-                            txtStatus.getText()
-                    );
-                    String insert = "Insert into Animals (animalID,Name,Species,BReed,Age,Gender,Weight,Status) VALUES (" + submittedAnimal.animalID + ", '"
-                            + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', '"
-                            + cboAge.getValue() + "', '" + cboWeight.getValue() + "', '" + txtStatus.getText() + "')";
-                    statement.execute(insert);
-                    statement.execute("commit");
+        ResultSet rsSpecies = statement.executeQuery("select distinct species from animals");
+        while (rsSpecies.next()) {
 
-                    //clear text fields after submission
-                    txtName.setText("");
-                    cboSpecies.setValue(null);
-                    txtBreed.setText("");
-                    cboAge.setValue(null);
-                    cboGender.setValue(null);
-                    cboWeight.setValue(null);
-                    txtStatus.setText("Evaluating for adoption");
+            String species = rsSpecies.getString(1);
+            cboSpecies.getItems().add(species);
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
-                    alert.setHeaderText("Application Submitted!");
+            saveButton.setOnAction(ee -> {
+                //give error if any fields are empty
+                if (txtName.getText().isEmpty() || cboSpecies.getValue() == null || txtBreed.getText().isEmpty() || txtAge.getText() == null
+                        || cboGender.getValue() == null || txtWeight.getText() == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Please Enter All Animal Information");
                     alert.showAndWait();
+                } else {
+                    try {
+                        Animal submittedAnimal = new Animal( //create new animal
+                                txtName.getText(),
+                                cboSpecies.getValue(),
+                                txtBreed.getText(),
+                                Integer.valueOf(txtAge.getText()),
+                                cboGender.getValue(),
+                                Integer.valueOf(txtWeight.getText()),
+                                txtStatus.getText()
+                        );
+                        String insert = "Insert into Animals (animalID, Name, Species, Breed, Age, Gender, Weight, Status) VALUES (" + submittedAnimal.animalID + ", '"
+                                + txtName.getText() + "', '" + cboSpecies.getValue() + "', '" + txtBreed.getText() + "', "
+                                + txtAge.getText() + ", '" + cboGender.getValue() + "', " + txtWeight.getText() + ", '" + txtStatus.getText() + "')";
+                        statement.execute(insert);
+                        statement.execute("commit");
 
-                } catch (SQLException ex) {
-                    Logger.getLogger(capstoneRedo2.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                        //clear text fields after submission
+                        txtName.setText("");
+                        cboSpecies.setValue(null);
+                        txtBreed.setText("");
+                        txtAge.setText("");
+                        cboGender.setValue(null);
+                        txtWeight.setText("");
+                        txtStatus.setText("");
+
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                        alert.setHeaderText("Animal Added To System!");
+                        alert.showAndWait();
+
+                    } catch (SQLException ex) {
+                        Logger.getLogger(capstoneRedo2.class
+                                .getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public void updateAnimal() throws SQLException {
@@ -1316,23 +1331,85 @@ public class capstoneRedo2 extends Application {
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-        refreshCenterPane(centerPane);
-        pane.setTop(heading("Update Animals Status"));
-        pane.setBottom(backAnimals);
+        // controlls
+        Button updateA = new Button("Update Animal Status");
+        TextField name = new TextField();
+        TextField spec = new TextField();
+        TextField breed = new TextField();
+        TextField age = new TextField();
+        TextField gender = new TextField();
+        TextField weight = new TextField();
 
-    }
+        //  TextField id = new TextField();
+        name.setEditable(false);
+        spec.setEditable(false);
+        breed.setEditable(false);
+        age.setEditable(false);
+        gender.setEditable(false);
+        weight.setEditable(false);
+        //  id.setEditable(false);
+        ComboBox<String> animal = new ComboBox<>();
+        TextField status = new TextField();
+        status.setEditable(false);
 
-    public void animalCheck() throws SQLException {
-        String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
-        OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
-        ds.setURL(connectionString);
-        Connection con = ds.getConnection("javauser", "javapass");
-        Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        updateA.setStyle(buttonStyle);
+        try {
+            String query = "Select distinct status from animals where status ='Ready for adoption'";
+            ResultSet rsSpecializations = statement.executeQuery(query);
+            while (rsSpecializations.next()) {
+                status.setText(rsSpecializations.getString("status"));
+            }
+        } catch (SQLException ex) {
+        }
 
-        refreshCenterPane(centerPane);
-        pane.setTop(heading("Animal Check In / Out"));
-        pane.setBottom(backAnimals);
+        ResultSet rsEval = statement.executeQuery("select animalId, Name from Animals where status= 'Evaluating for adoption'");
+        while (rsEval.next()) {
+            int aId = rsEval.getInt(1);
+            String aName = rsEval.getString(2);
+            String animalInfo = "ID: " + aId + " \nName: " + aName;
+            animal.getItems().add(animalInfo);
 
+            refreshCenterPane(centerPane);
+
+            pane.setTop(heading("Ready For Adoption Update"));
+            //animal.setItems(animalInfo);
+            VBox root = new VBox();
+            HBox top = new HBox();
+            top.getChildren().addAll(labelText("Select Animal Being Evaluated: \t"), animal);
+            HBox hbox = new HBox();
+            hbox.getChildren().addAll(labelText("Updated Status: \t"), status);
+
+            updateA.setOnAction(e -> {
+                try {
+                    //code to update sql database when button is clicked
+                    String selectedAnimal = animal.getSelectionModel().getSelectedItem();
+                    String[] info = selectedAnimal.split(" ");
+                    String id = info[1];
+                    String sql = "update animals set status= '" + status.getText() + "' "
+                            + "where animalID = " + id;
+                    statement.executeQuery(sql);
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(capstoneRedo2.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION); //give alert that application was submitted
+                alert.setHeaderText("Animal Is Ready For Adoption!");
+                alert.showAndWait();
+            });
+
+            HBox bottom = new HBox();
+            bottom.getChildren().add(updateA);
+
+            root.getChildren().addAll(top, hbox, bottom);
+            hbox.setSpacing(10);
+            root.setSpacing(10);
+            centerPane.add(root, 0, 0);
+            centerPane.setHgap(10.0);
+            centerPane.setVgap(10.0);
+            pane.setBottom(backAnimals);
+            pane.setCenter(centerPane);
+        }
     }
 
     public VBox social() {
