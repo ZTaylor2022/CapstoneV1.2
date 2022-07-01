@@ -763,7 +763,7 @@ public class capstoneRedo2 extends Application {
 
                         System.out.println(totalHours);
                         //query to insert total hours into table... total hours column in table
-                        String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
+                        String query = "update shifts set totalHours = " + df.format(totalHours)
                                 + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
                         statement.executeQuery(query);
                         statement.executeQuery("commit");
