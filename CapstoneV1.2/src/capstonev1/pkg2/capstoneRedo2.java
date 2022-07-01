@@ -686,6 +686,18 @@ public class capstoneRedo2 extends Application {
                         String updateVTable = "update volunteers set hours = " + df.format(hours)
                                 + " where volunteerid = " + loggedInVolID;
                         statement.executeQuery(updateVTable);
+                        
+                        if (hours >= 20 ){
+                            String updateSql = "update volunteers set Title = 'Full Volunteer' "
+                                    + " where volunteerid = " + loggedInVolID;
+                            statement.executeQuery(updateSql);
+                            statement.executeQuery("commit");
+                        }else {
+                            String updateSql = "update volunteers set Title = 'Volunteer in Training' "
+                                    + " where volunteerid = " + loggedInVolID;
+                            statement.executeQuery(updateSql);
+                            statement.executeQuery("Commit");
+                        }
                     }
                 }
             } catch (SQLException ex) {
