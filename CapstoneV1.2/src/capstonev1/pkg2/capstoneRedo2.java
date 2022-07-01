@@ -81,22 +81,10 @@ public class capstoneRedo2 extends Application {
     ObservableList<ObservableList> data = FXCollections.observableArrayList();
     TableView tableHome = new TableView();
     TableView tableUpdate = new TableView();
-    ComboBox<String> cboStatus = new ComboBox<>();
     ComboBox<String> cboAnimal = new ComboBox<>();
     ComboBox<String> cboSpecies = new ComboBox<>();
     ComboBox<String> cboGender = new ComboBox<>();
-    Label lblName = new Label("Enter Animal Name");
-    TextField txtName = new TextField();
-    Label lblSpecies = new Label("Select Species");
-    Label lblBreed = new Label("Enter Animal Breed");
-    TextField txtBreed = new TextField();
-    Label lblAge = new Label("Enter Animal Age");
-    ComboBox<Integer> cboAge = new ComboBox<>();
-    Label lblWeight = new Label("Enter Animal Weight (lbs)");
-    ComboBox<Integer> cboWeight = new ComboBox<>();
-    Label lblGender = new Label("Enter Gender");
-    Label lblStatus = new Label("Animal Status");
-    TextField txtStatus = new TextField("Evaluating for adoption");
+    
 
     public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
@@ -117,27 +105,8 @@ public class capstoneRedo2 extends Application {
         // Animal functions
         saveButton.setStyle(buttonStyle);
         cboGender.getItems().addAll("Male", "Female");
-
-        cboAge.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50);
         cboSpecies.getItems().addAll("Dog", "Cat", "Rabbit", "Fish", "Lizard", "Snake", "Hamster", "Ferret", "Chicken", "Pig");
         cboSpecies.setEditable(true);
-        txtStatus.setEditable(false);
-        cboStatus.setItems(status);
-        cboWeight.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-                71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-                81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-                91, 92, 93, 94, 95, 96, 97, 98, 99, 100);
-        cboWeight.setEditable(true);
         centerPane.setHgap(10.0);
 
         Scene scene = new Scene(pane, 500, 500); //Create a scene
