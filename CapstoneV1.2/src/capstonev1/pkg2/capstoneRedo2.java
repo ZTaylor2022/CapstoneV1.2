@@ -1,9 +1,5 @@
 package capstonev1.pkg2;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,32 +7,22 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-
-import java.util.Set;
-
-import java.util.ArrayList;
 import java.util.Date;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import static javafx.collections.FXCollections.observableArrayList;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import static javafx.geometry.Orientation.VERTICAL;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -51,17 +37,12 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javax.swing.JComboBox;
 import oracle.jdbc.pool.OracleDataSource;
 import javafx.scene.layout.TilePane;
-import javafx.scene.control.SelectionModel;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TextArea;
@@ -70,20 +51,6 @@ import javafx.util.Callback;
 
 //import oracle.jdbc.pool.OracleDataSource;
 public class capstoneRedo2 extends Application {
-
-    //Making a comment fknlslfm;ammk
-    /*
-    TO DO:
-    1. Add specilization and social pages
-    2. Add database functionality and populate boxes
-    3. Continue to work on making prettier
-    (THIS IS JUST A GUI AS OF NOW)
-    
-    NOTES:
-    1. Many methods specific to this application to save time and make code
-    prettier, make sure to read through to familiarize yourself  before 
-    beginning edits. 
-     */
     BorderPane pane = new BorderPane();
     GridPane centerPane = new GridPane();
 
@@ -108,9 +75,7 @@ public class capstoneRedo2 extends Application {
     Button report4 = new Button("Volunteer \nContact \nInformation");
 
     // animal functions
-    Button updateStatus = new Button("Update Status");
-    Button animalCheck = new Button("Check In / Out");
-    Button addAnimal = new Button("Add Animal");
+    
     Button saveButton = new Button("Save");
     ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
     ObservableList<ObservableList> data = FXCollections.observableArrayList();
@@ -1129,11 +1094,16 @@ public class capstoneRedo2 extends Application {
         Connection con = ds.getConnection("javauser", "javapass");
         Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
+        ObservableList<ObservableList> data = FXCollections.observableArrayList();
+        Button updateStatus = new Button("Update Status");
+        Button addAnimal = new Button("Add Animal");
         refreshCenterPane(centerPane);
+        tableHome.getItems().clear();
+
         pane.setTop(heading("Current Animals"));
 
-        HBox top = new HBox();
-        top.getChildren().addAll(addAnimal, updateStatus, animalCheck);
+        HBox bottom = new HBox();
+        bottom.getChildren().addAll(addAnimal, updateStatus);
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(saveButton);
 
@@ -1154,7 +1124,8 @@ public class capstoneRedo2 extends Application {
         } catch (SQLException ex) {
         }
 
-        try { // populating table with all animals
+        try {
+            // populating table with all animals
             String query = "Select * from animals";
             ResultSet rs = statement.executeQuery(query);
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
@@ -1168,14 +1139,15 @@ public class capstoneRedo2 extends Application {
                 });
                 tableHome.getColumns().addAll(col);
             }
+
             while (rs.next()) {
                 int AnimalID = rs.getInt(1);
                 String name = rs.getString(2); // getting first name from animals table
                 String species = rs.getString(3); // getting species from animals table
                 String breed = rs.getString(4); // getting breed from animals table
-                String age = rs.getString(5); // getting age from animals table
+                int age = rs.getInt(5); // getting age from animals table
                 String gender = rs.getString(6); // getting gender from animals table
-                String weight = rs.getString(7); // getting weight from animals table
+                int weight = rs.getInt(7); // getting weight from animals table
                 String Status = rs.getString(8); // getting status from animals table
                 String animalInfo = AnimalID + " " + name + " " + species + " "
                         + breed + " " + age + " " + gender + " "
@@ -1189,19 +1161,41 @@ public class capstoneRedo2 extends Application {
                     row.add(rs.getString(i));
                 }
                 data.add(row);
+
             }
             tableHome.setItems(data);
         } catch (SQLException ex) {
         }
         //  refreshCenterPane(centerPane);
 
-        top.setAlignment(Pos.CENTER);
+        // 'Add Animal' Button
+        // takes you to addAnimals()
+        addAnimal.setOnAction(e -> {
+            try {
+                addAnimals();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        // 'Update Animal' Button 
+        // takes you to updateAnimal()
+        updateStatus.setOnAction(e -> {
+            try {
+                updateAnimal();
+            } catch (SQLException ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
-        top.setSpacing(10);
+        bottom.setAlignment(Pos.CENTER);
+
+        bottom.setSpacing(10);
         hbox1.setAlignment(Pos.CENTER);
 
-        centerPane.add(top, 0, 1);
-        centerPane.add(tableHome, 0, 3);
+        centerPane.add(tableHome, 0, 1);
+        centerPane.add(bottom, 0, 3);
         pane.setCenter(centerPane);
 
         addBackButton();
@@ -1225,7 +1219,6 @@ public class capstoneRedo2 extends Application {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-
     }
 
     public void addAnimals() throws SQLException {
