@@ -205,12 +205,6 @@ public class capstoneRedo2 extends Application {
         backAnimals.setStyle(buttonStyle);
         BorderPane.setMargin(backAnimals, new Insets(10));
 
-        // temporary
-        Button t = new Button("Temp");
-        t.setOnAction(e -> {
-            homeScreen();
-        });
-
         loginButton.setOnAction(e -> {
             user = userNameTF.getText();
             String pass = passwordTF.getText();
