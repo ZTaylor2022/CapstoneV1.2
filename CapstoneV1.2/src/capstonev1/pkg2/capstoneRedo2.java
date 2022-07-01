@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
@@ -652,42 +653,55 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Todays Date: "), 0, 1);
         centerPane.add(labelText("Current Time: "), 0, 2);
         centerPane.add(labelText("Available Tasks: "), 0, 3);
-//        centerPane.add(labelText("Check-In Location: "), 0, 4);
+        centerPane.add(labelText("Animal Going: "), 0, 4);
 
         centerPane.add(dateLbl, 1, 1);
         centerPane.add(timeLbl, 1, 2);
         centerPane.add(cboTasks, 1, 3);
+        centerPane.add(cboAnimal, 1, 4);
         centerPane.add(clockin, 0, 7);
         centerPane.add(clockout, 1, 7);
-
+        try {
+            String query = "select animalID, name from animals";
+            ResultSet rsAnimal = statement.executeQuery(query);
+            while (rsAnimal.next()) {
+                int animalID = rsAnimal.getInt(1);
+                String animalName = rsAnimal.getString(2);
+                String animalInfo = "ID: " + animalID + " \nName: " + animalName;
+                cboAnimal.getItems().add(animalInfo);
+            }
+        } catch (SQLException ex) {
+        }
         ResultSet rsTasks = statement.executeQuery("select taskid, description, location, Mileage from Tasks");
         while (rsTasks.next()) {
             int taskID = rsTasks.getInt(1);
             String des = rsTasks.getString(2);
             String loc = rsTasks.getString(3);
             String mil = rsTasks.getString(4);
-            String taskInfo = taskID + " | " + des + " | " + loc + " | " + mil;
+            String taskInfo = "Task ID: " + taskID + " \n" + des + "\nLocation: " + loc + ",\n" + mil + " Miles away";
             cboTasks.getItems().add(taskInfo);
 
-//        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
-//        while (rsLocation.next()) {
-//            cboLocation.getItems().add(rsLocation.getString(1));
-//        }
             Shifts newShift = new Shifts();
             clockin.setOnAction(e -> {
                 String selectedTask = cboTasks.getSelectionModel().getSelectedItem();
-                String[] info = selectedTask.split(" ");
-                String id = info[0];
+                String[] tasks = selectedTask.split(" ");
+                String tID = tasks[2];
+
+                String selectedAnimal = cboAnimal.getSelectionModel().getSelectedItem();
+                String[] animals = selectedAnimal.split(" ");
+                String aID = animals[1];
+
                 newShift.setVolID(loggedInVolID);
                 newShift.setTimeIn(timeNow);
-                newShift.setTimeOut("None");
+                newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setTaskID(Integer.valueOf(id));
-//            Shifts newShift = new Shifts(
+                newShift.setHours(" ");
+                newShift.setTaskID(Integer.valueOf(tID));
+                newShift.setAniamlID(Integer.valueOf(aID));
                 System.out.println(newShift);
-                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID)"
+                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd')," + newShift.taskID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" + newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -698,24 +712,62 @@ public class capstoneRedo2 extends Application {
                 alert.showAndWait();
 
             });
-        }
+        
         clockout.setOnAction(e -> {
+            DecimalFormat df = new DecimalFormat("0.00");
             String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
                     + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+            String sqlSelect = "select timeIn from shifts "
+                    + "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+            newShift.setTimeOut(timeNow);
             try {
                 statement.executeQuery(sqlQuery);
-                statement.executeQuery("commit");
+                ResultSet rs = statement.executeQuery(sqlSelect);
+                while (rs.next()) {
+                    String timeIn = rs.getString(1);
+                    System.out.println(timeIn);
+                    String timeOut = newShift.getTimeOut();
+                    String[] timeInSArray = timeIn.split(":");
+                    String[] timeOutSArray = timeOut.split(":");
+                    double[] timeInArray = {Double.parseDouble(timeInSArray[0]), Double.parseDouble(timeInSArray[1])};
+                    double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]), Double.parseDouble(timeOutSArray[1])};
+                    timeInArray[1] = timeInArray[1] / 60;
+                    timeOutArray[1] = timeOutArray[1] / 60;
+                    double timeInHours = timeInArray[0] + timeInArray[1];
+                    double timeOutHours = timeOutArray[0] + timeOutArray[1];
+                    double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
+
+                    System.out.println(totalHours);
+                    //query to insert total hours into table... total hours column in table
+                    String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
+                            + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+                    statement.executeQuery(query);
+                    statement.executeQuery("commit");
+
+                    String ytdHours = "select SUM(totalHours)" + " from shifts "
+                            + "where volunteerid = " + loggedInVolID;
+                    ResultSet rsHours = statement.executeQuery(ytdHours);
+                    while (rsHours.next()) {
+                        double hours = rsHours.getDouble(1);
+                        String updateVTable = "update volunteers set hours = " + df.format(hours)
+                                + " where volunteerid = " + loggedInVolID;
+                        statement.executeQuery(updateVTable);
+                    }
+                }
             } catch (SQLException ex) {
             }
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setHeaderText("You are clocked out!");
             alert.showAndWait();
         });
-        
+
         pane.setCenter(centerPane);
 
         addBackButton();
     }
+    }
+
+
 
     public void logTask() throws SQLException {
         ComboBox<String> cboLocation = new ComboBox<>();
