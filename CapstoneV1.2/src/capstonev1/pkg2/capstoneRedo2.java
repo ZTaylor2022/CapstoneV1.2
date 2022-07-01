@@ -725,7 +725,7 @@ public class capstoneRedo2 extends Application {
                 System.out.println(newShift);
                 String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" + newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.totalHours + ", " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
