@@ -719,7 +719,7 @@ public class capstoneRedo2 extends Application {
                 newShift.setTimeIn(timeNow);
                 newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setHours(" ");
+                newShift.setHours(0);
                 newShift.setTaskID(Integer.valueOf(tID));
                 newShift.setAniamlID(Integer.valueOf(aID));
                 System.out.println(newShift);
