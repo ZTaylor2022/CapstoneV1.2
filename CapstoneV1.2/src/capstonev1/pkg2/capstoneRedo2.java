@@ -1044,17 +1044,17 @@ public class capstoneRedo2 extends Application {
 
         Button saveButton = new Button("Save");
         saveButton.setStyle(buttonStyle);
-        ObservableList status = FXCollections.observableArrayList("Approved", "Denied");
+        ObservableList status = FXCollections.observableArrayList("Accepted", "Declined");
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         TableView tableView = new TableView();
         ComboBox<String> statusCB = new ComboBox<>();
         ComboBox<String> appList = new ComboBox<>();
         statusCB.setItems(status);
 
-        pane.setTop(heading("Approve or Deny Applications"));
+        pane.setTop(heading("Accept or Decline Applications"));
         //Label lblSelection = new Label("Make Selection");
         Label lblApplicant = new Label("Applicant \t");
-        Label lblStatus = new Label("Approve or Deny \t");
+        Label lblStatus = new Label("Accept or Decline \t");
 
         HBox hbox1 = new HBox();
         hbox1.getChildren().addAll(lblApplicant, appList);
