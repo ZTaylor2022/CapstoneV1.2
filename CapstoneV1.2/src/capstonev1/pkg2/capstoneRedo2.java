@@ -49,11 +49,19 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
-//import oracle.jdbc.pool.OracleDataSource;
+/* 
+*****CAPSTONE FINAL PROJECT - BARK DATABASE APPLICATION*****
+Created by: Luke Fisher, Vanessa Quinteros, Brian Ziltz, David Burrington
+    Harry Challis, Zach Taylor
+ */
 public class capstoneRedo2 extends Application {
+
+    //Panes - borderpane functions as overall scene, centerpane is refreshed 
+    //and almost always in the center
     BorderPane pane = new BorderPane();
     GridPane centerPane = new GridPane();
 
+    //Establish global objects and variables
     Button backButton = new Button("Home Screen");
     ToolBar toolBar = new ToolBar();
     ToolBar toolBarA = new ToolBar();
@@ -62,6 +70,7 @@ public class capstoneRedo2 extends Application {
     String user;
     int loggedInVolID; //Use this to get the id number of the volunteer that is logged in
 
+    //Fonts and inline CSS defaults for easy access and editing
     String fontStyle = "garamond";
 
     String buttonStyle = "-fx-background-color: #2F4F4F; -fx-text-fill: #FFFFFF;"
@@ -69,13 +78,15 @@ public class capstoneRedo2 extends Application {
     String reportButtonStyle = "-fx-background-color: #66CDAA; -fx-text-fill: #FFFFFF;"
             + "-fx-font-family: \"" + fontStyle + "\";";
 
-    Button report1 = new Button("Volunteer Hours");
-    Button report2 = new Button("Event Attendance");
+    Button report1 = new Button("Volunteers");
+    Button report2 = new Button("Shifts");
     Button report3 = new Button("Volunteer \nSpecialization");
     Button report4 = new Button("Volunteer \nContact \nInformation");
+    Button report5 = new Button("Volunteer Hours");
+    Button report6 = new Button("Animals");
+    Button report7 = new Button("Tasks");
 
-    // animal functions
-    
+    //Globals for animals
     Button saveButton = new Button("Save");
     ObservableList status = FXCollections.observableArrayList("Ready For Adoption", "Evaluating");
     ObservableList<ObservableList> data = FXCollections.observableArrayList();
@@ -85,7 +96,10 @@ public class capstoneRedo2 extends Application {
     ComboBox<String> cboSpecies = new ComboBox<>();
     ComboBox<String> cboGender = new ComboBox<>();
     
+    ObservableList<String> reportList = FXCollections.observableArrayList();
+    TilePane reportTilePane = new TilePane();
 
+    //Creates initial scenes, stages, variables, ect.
     public void start(Stage primaryStage) throws SQLException {
         pane.setTop(heading("WELCOME TO THE BARK DATABASE"));
         welcomeModule();
@@ -99,8 +113,14 @@ public class capstoneRedo2 extends Application {
         report2.setStyle(reportButtonStyle);
         report3.setStyle(reportButtonStyle);
         report4.setStyle(reportButtonStyle);
+        report5.setStyle(reportButtonStyle);
+        report6.setStyle(reportButtonStyle);
+        report7.setStyle(reportButtonStyle);
+        
 
-        toolBar.getItems().addAll(report1, report2, report3, report4);
+        //Establish tool bar
+        toolBar.getItems().addAll(report1, report2, report3, report4, report5,
+                report6, report7);
 
         // Animal functions
         saveButton.setStyle(buttonStyle);
@@ -109,32 +129,33 @@ public class capstoneRedo2 extends Application {
         cboSpecies.setEditable(true);
         centerPane.setHgap(10.0);
 
-        Scene scene = new Scene(pane, 500, 500); //Create a scene
-        primaryStage.setTitle("Bark"); //set stage title
-        primaryStage.setScene(scene); //place scene on stage
-        primaryStage.show();//display the stage
+        Scene scene = new Scene(pane, 500, 500);
+        primaryStage.setTitle("Bark");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
+    
+/*******BEGIN: Ease of development methods**********/
 
+    //Method to create subheadings 
     public Text subHeading(String string) {
         Text text = new Text(string);
         text.setFont(Font.font(fontStyle, FontWeight.BOLD, 15));
-        //text.setStroke(Color.DARKSLATEGRAY);
-        //text.setStrokeWidth(1);
         text.setFill(Color.DARKSLATEGRAY);
         return text;
     }
 
+    //Method to create headings
     public Text heading(String title) {
         Text text = new Text(title);
         text.setFont(Font.font(fontStyle, FontWeight.BOLD, 17));
-        //text.setStroke(Color.DARKSLATEGRAY);
-        //text.setStrokeWidth(1);
         text.setFill(Color.DARKSLATEGRAY);
         BorderPane.setMargin(text, new Insets(10, 10, 10, 10));
         BorderPane.setAlignment(text, Pos.CENTER);
         return text;
     }
 
+    //Method to create and style labels
     public Text labelText(String string) {
         Text text = new Text(string);
         text.setFont(Font.font(fontStyle, FontWeight.BOLD, 13));
@@ -142,6 +163,7 @@ public class capstoneRedo2 extends Application {
         return text;
     }
 
+    //Method to add back button to page
     public void addBackButton() {
         backButton.setStyle(buttonStyle);
         BorderPane.setMargin(backButton, new Insets(10));
@@ -152,7 +174,17 @@ public class capstoneRedo2 extends Application {
             homeScreen();
         });
     }
+    
+    //Method to clear centerPane
+    public void refreshCenterPane(GridPane gP) {
+        gP.getChildren().clear();
+    }
+    
+/*******END: Ease of development methods**********/
 
+/*******BEGIN: Welcome/Application Screens**********/
+
+    //Initial welcome screen
     public void welcomeModule() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -254,11 +286,7 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
     }
-
-    public void refreshCenterPane(GridPane gP) {
-        gP.getChildren().clear();
-    }
-
+    //Method for application screen
     public void applicationScreen() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -397,35 +425,40 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
 
     }
-
-    public void homeScreen() {
-        GridPane leftPane = new GridPane();
     
+/*******END: Welcome/Application Screens**********/
+    
+/*******BEGIN: Volunteer Home Screen Methods**********/
+
+    //Main home screen for volunteers
+    public void homeScreen() {
+
+        ToolBar toolBar2 = new ToolBar();
+        
+        toolBar2.setOrientation(VERTICAL);
+        toolBar2.setBackground(new Background(new BackgroundFill(
+                Color.DARKSLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+        
         pane.setTop(heading("Volunteer Home Screen"));
 
         Button checkInOut = new Button("Check In/Out");
         Button reportsButton = new Button("Reports Page");
         Button logEventButton = new Button("Create A Task");
         Button assignSpecButton = new Button("Assign Specialization");
-        Button applicationApproval = new Button("View Pending Applications");
+        Button applicationApproval = new Button("View Pending \nApplications");
         Button btnAnimals = new Button("View Animals");
 
-        checkInOut.setStyle(buttonStyle);
-        reportsButton.setStyle(buttonStyle);
-        logEventButton.setStyle(buttonStyle);
-        assignSpecButton.setStyle(buttonStyle);
-        applicationApproval.setStyle(buttonStyle);
-        btnAnimals.setStyle(buttonStyle);
+        checkInOut.setStyle(reportButtonStyle);
+        reportsButton.setStyle(reportButtonStyle);
+        logEventButton.setStyle(reportButtonStyle);
+        assignSpecButton.setStyle(reportButtonStyle);
+        applicationApproval.setStyle(reportButtonStyle);
+        btnAnimals.setStyle(reportButtonStyle);
 
         refreshCenterPane(centerPane);
 
-        leftPane.add(subHeading("Menu"), 0, 0);
-        leftPane.add(checkInOut, 0, 1);
-        leftPane.add(applicationApproval, 0, 2);
-        leftPane.add(btnAnimals, 0, 3);
-        leftPane.add(assignSpecButton, 0, 4);
-        leftPane.add(logEventButton, 0, 5);
-        leftPane.add(reportsButton, 0, 6);
+        toolBar2.getItems().addAll(checkInOut, reportsButton, logEventButton,
+        assignSpecButton, applicationApproval, btnAnimals);
 
         checkInOut.setOnAction(e -> {
             try {
@@ -447,8 +480,10 @@ public class capstoneRedo2 extends Application {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         });
-        reportsButton.setOnAction(e -> {pane.setLeft(null);
-        reports();});
+        reportsButton.setOnAction(e -> {
+            pane.setLeft(null);
+            reports();
+        });
         assignSpecButton.setOnAction(e -> {
             try {
                 pane.setLeft(null);
@@ -483,11 +518,66 @@ public class capstoneRedo2 extends Application {
         });
 
         centerPane.setVgap(8);
-        pane.setLeft(leftPane);
+        pane.setLeft(toolBar2);
         pane.setCenter(social());
 
     }
 
+    //Method for the bark social page
+    public VBox social() {
+        refreshCenterPane(centerPane);
+
+        VBox socialFeed = new VBox();
+
+        //adds buttons/textfields
+        ListView<String> chatbox = new ListView<String>();
+        TextArea newMessage = new TextArea();
+        Button post = new Button("Post");
+        post.setStyle(buttonStyle);
+
+        //sets textfild and button sizes
+        chatbox.setPrefWidth(500);
+        newMessage.setPrefWidth(500);
+
+        //Messages
+        ObservableList<String> messages
+                = FXCollections.observableArrayList(
+                        "Brad Pitt: Is Anyone heading to Lynchburg tomorrow?",
+                        "Paula Larry: Yes, do you need a ride?",
+                        "Brad Pitt: Yes, can you pick me up at 118 Street Road at 9:00?",
+                        "Paula Larry: Sounds good, see you then!",
+                        "Abby Turner: Does anyone need extra grooming supplies?"
+                );
+
+        socialFeed.getChildren().add(subHeading("BARK Social"));
+        socialFeed.getChildren().add(chatbox);
+        socialFeed.getChildren().add(labelText("Add to the conversation!"));
+        socialFeed.getChildren().add(newMessage);
+        socialFeed.getChildren().add(post);
+
+        chatbox.setItems(messages);
+
+        post.setOnAction(e -> {
+            String postString = (this.user + ": " + newMessage.getText());
+            chatbox.getItems().add(postString);
+            newMessage.clear();
+        });
+
+        addBackButton();
+
+        socialFeed.setPrefWidth(80);
+        socialFeed.setAlignment(Pos.CENTER);
+        socialFeed.setPadding(new Insets(10.0));
+        socialFeed.setSpacing(10.0);
+
+        return socialFeed;
+    }
+    
+/*******END: Volunteer Home Screen Methods**********/
+
+/*******BEGIN: Button Event Methods**********/
+    
+    //Method for the assign specialization screen
     public void assignSpec() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -525,7 +615,7 @@ public class capstoneRedo2 extends Application {
                 String firstName = rsVolunteers.getString(2); //getting first name from application table
                 String lastName = rsVolunteers.getString(3); //getting last name from application table
                 String volInfo = volID + " " + firstName + " " + lastName; //combining into one string to add to the combobox
-                volunteersList.getItems().add(volInfo); //populate combo box for volunteers????
+                volunteersList.getItems().add(volInfo);
                 assignSpecButton.setOnAction(e -> {
                     try {
                         //code to update sql database when button is clicked
@@ -560,7 +650,7 @@ public class capstoneRedo2 extends Application {
 
     }
 
-    //public void volunteerCheckIO(String type) {
+    //Method for check in/out screen
     public void volunteerCheckIO() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -629,13 +719,13 @@ public class capstoneRedo2 extends Application {
                 newShift.setTimeIn(timeNow);
                 newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setHours(0);
+                newShift.setHours(" ");
                 newShift.setTaskID(Integer.valueOf(tID));
                 newShift.setAniamlID(Integer.valueOf(aID));
                 System.out.println(newShift);
                 String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.totalHours + ", " + newShift.taskID + ", " + newShift.animalID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" + newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -646,75 +736,62 @@ public class capstoneRedo2 extends Application {
                 alert.showAndWait();
 
             });
-        
-        clockout.setOnAction(e -> {
-            DecimalFormat df = new DecimalFormat("0.00");
-            String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
-                    + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-            String sqlSelect = "select timeIn from shifts "
-                    + "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-            newShift.setTimeOut(timeNow);
-            try {
-                statement.executeQuery(sqlQuery);
-                ResultSet rs = statement.executeQuery(sqlSelect);
-                while (rs.next()) {
-                    String timeIn = rs.getString(1);
-                    System.out.println(timeIn);
-                    String timeOut = newShift.getTimeOut();
-                    String[] timeInSArray = timeIn.split(":");
-                    String[] timeOutSArray = timeOut.split(":");
-                    double[] timeInArray = {Double.parseDouble(timeInSArray[0]), Double.parseDouble(timeInSArray[1])};
-                    double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]), Double.parseDouble(timeOutSArray[1])};
-                    timeInArray[1] = timeInArray[1] / 60;
-                    timeOutArray[1] = timeOutArray[1] / 60;
-                    double timeInHours = timeInArray[0] + timeInArray[1];
-                    double timeOutHours = timeOutArray[0] + timeOutArray[1];
-                    double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
 
-                    System.out.println(totalHours);
-                    //query to insert total hours into table... total hours column in table
-                    String query = "update shifts set totalHours = " + df.format(totalHours)
-                            + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-                    statement.executeQuery(query);
-                    statement.executeQuery("commit");
+            clockout.setOnAction(e -> {
+                DecimalFormat df = new DecimalFormat("0.00");
+                String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
+                        + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+                String sqlSelect = "select timeIn from shifts "
+                        + "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+                newShift.setTimeOut(timeNow);
+                try {
+                    statement.executeQuery(sqlQuery);
+                    ResultSet rs = statement.executeQuery(sqlSelect);
+                    while (rs.next()) {
+                        String timeIn = rs.getString(1);
+                        System.out.println(timeIn);
+                        String timeOut = newShift.getTimeOut();
+                        String[] timeInSArray = timeIn.split(":");
+                        String[] timeOutSArray = timeOut.split(":");
+                        double[] timeInArray = {Double.parseDouble(timeInSArray[0]), Double.parseDouble(timeInSArray[1])};
+                        double[] timeOutArray = {Double.parseDouble(timeOutSArray[0]), Double.parseDouble(timeOutSArray[1])};
+                        timeInArray[1] = timeInArray[1] / 60;
+                        timeOutArray[1] = timeOutArray[1] / 60;
+                        double timeInHours = timeInArray[0] + timeInArray[1];
+                        double timeOutHours = timeOutArray[0] + timeOutArray[1];
+                        double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
 
-                    String ytdHours = "select SUM(totalHours)" + " from shifts "
-                            + "where volunteerid = " + loggedInVolID;
-                    ResultSet rsHours = statement.executeQuery(ytdHours);
-                    while (rsHours.next()) {
-                        double hours = rsHours.getDouble(1);
-                        String updateVTable = "update volunteers set hours = " + df.format(hours)
-                                + " where volunteerid = " + loggedInVolID;
-                        statement.executeQuery(updateVTable);
-                        
-                        if (hours >= 20 ){
-                            String updateSql = "update volunteers set Title = 'Full Volunteer' "
+                        System.out.println(totalHours);
+                        //query to insert total hours into table... total hours column in table
+                        String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
+                                + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
+                        statement.executeQuery(query);
+                        statement.executeQuery("commit");
+
+                        String ytdHours = "select SUM(totalHours)" + " from shifts "
+                                + "where volunteerid = " + loggedInVolID;
+                        ResultSet rsHours = statement.executeQuery(ytdHours);
+                        while (rsHours.next()) {
+                            double hours = rsHours.getDouble(1);
+                            String updateVTable = "update volunteers set hours = " + df.format(hours)
                                     + " where volunteerid = " + loggedInVolID;
-                            statement.executeQuery(updateSql);
-                            statement.executeQuery("commit");
-                        }else {
-                            String updateSql = "update volunteers set Title = 'Volunteer in Training' "
-                                    + " where volunteerid = " + loggedInVolID;
-                            statement.executeQuery(updateSql);
-                            statement.executeQuery("Commit");
+                            statement.executeQuery(updateVTable);
                         }
                     }
+                } catch (SQLException ex) {
                 }
-            } catch (SQLException ex) {
-            }
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("You are clocked out!");
-            alert.showAndWait();
-        });
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("You are clocked out!");
+                alert.showAndWait();
+            });
 
-        pane.setCenter(centerPane);
+            pane.setCenter(centerPane);
 
-        addBackButton();
-    }
+            addBackButton();
+        }
     }
 
-
-
+    //Method to log tasks
     public void logTask() throws SQLException {
         ComboBox<String> cboLocation = new ComboBox<>();
         TextField txtMileage = new TextField();
@@ -798,7 +875,7 @@ public class capstoneRedo2 extends Application {
                             + maxVol.getValue() + ")";
                     statement.execute(insert);
                     statement.execute("commit");
-//clear text fields after submission
+                    //clear text fields after submission
                     cboLocation.setValue(null);
                     txtMileage.setText("");
                     cboDescription.setValue(null);
@@ -818,6 +895,9 @@ public class capstoneRedo2 extends Application {
 
     }
 
+    /*BEGIN: Sub-Section ~Reports~ */
+    
+    //Method for reports screen, establishes button functionality
     public void reports() {
         refreshCenterPane(centerPane);
 
@@ -829,47 +909,30 @@ public class capstoneRedo2 extends Application {
 
         pane.setLeft(toolBar);
 
-        report1.setOnAction(e -> {
-            try {
-                reportBuilder(1);
-
-            } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        report2.setOnAction(e -> {
-            try {
-                reportBuilder(2);
-
-            } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        report3.setOnAction(e -> {
-            try {
-                reportBuilder(3);
-
-            } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        report4.setOnAction(e -> {
-            try {
-                reportBuilder(4);
-
-            } catch (Exception ex) {
-                Logger.getLogger(capstoneRedo2.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        report1.setOnAction(e -> reportButtonsHandler(1));
+        report2.setOnAction(e -> reportButtonsHandler(2));
+        report3.setOnAction(e -> reportButtonsHandler(3));
+        report4.setOnAction(e -> reportButtonsHandler(4));
+        report5.setOnAction(e -> reportButtonsHandler(5));
+        report6.setOnAction(e -> reportButtonsHandler(6));
+        report7.setOnAction(e -> reportButtonsHandler(7));
+   
         addBackButton();
 
-        pane.setCenter(subHeading("No reports displayed"));
+        pane.setCenter(subHeading("NOTE: \nYou may need to \nExpand Page \nto format results"));
+    }
+    //Event handler for report buttons
+    public void reportButtonsHandler(int num) {
+            try {
+                reportBuilder(num);
+
+            } catch (Exception ex) {
+                Logger.getLogger(capstoneRedo2.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
     }
 
+    //Method for back-end processing of reports info
     public void reportBuilder(int selection) {
         try {
             String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
@@ -878,86 +941,94 @@ public class capstoneRedo2 extends Application {
             Connection con = ds.getConnection("javauser", "javapass");
             Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-            ObservableList<String> list = FXCollections.observableArrayList();
-
-            TilePane tilePane = new TilePane();
-            tilePane.setVgap(5);
+            reportTilePane.setVgap(5);
 
             if (selection == 1) {
-                list.clear();
-                ResultSet reportRS = statement.executeQuery("select FirstName, LastName, "
-                        + "Hours from application, volunteers where "
-                        + "application.applicationid = volunteers.applicationid order by lastname desc");
-                while (reportRS.next()) {
-                    for (int i = 0; i < 3; i++) {
-                        list.add(i, reportRS.getString(i + 1));
-                    }
-                }
-                tilePane.setPrefColumns(3);
-                tilePane.getChildren().add(subHeading("First Name"));
-                tilePane.getChildren().add(subHeading("Last Name"));
-                tilePane.getChildren().add(subHeading("Hours"));
+                ResultSet reportRS = statement.executeQuery("select "
+                        + "VolunteerID, FirstName, LastName from application, "
+                        + "volunteers where volunteers.applicationid = "
+                        + "application.applicationid");
+                String[] reportLabels = {"Volunteer ID","First Name","Last Name"};
+                reportBuilder2(3, reportRS, reportLabels);
                 pane.setTop(heading("Hours per Volunteer"));
             }
             if (selection == 2) {
-                list.clear();
-                ResultSet reportRS = statement.executeQuery("select * from attendance order by eventid desc");
-                while (reportRS.next()) {
-                    for (int i = 0; i < 2; i++) {
-                        list.add(i, reportRS.getString(i + 1));
-                    }
-                }
-                tilePane.setPrefColumns(2);
-                tilePane.getChildren().add(subHeading("Event ID"));
-                tilePane.getChildren().add(subHeading("Volunteer ID"));
-                pane.setTop(heading("Volunteer Attendance"));
+                ResultSet reportRS = statement.executeQuery("select * from shifts");
+                String[] reportLabels = {"Volunteer ID","Clock In","Clock Out","Date","Total Hours","Task ID","Animal ID"};
+                reportBuilder2(7, reportRS, reportLabels);
+                pane.setTop(heading("Shifts"));
             }
             if (selection == 3) {
-                list.clear();
-                ResultSet reportRS = statement.executeQuery("select volunteerid, specialization from volunteers order by volunteerid desc");
-                while (reportRS.next()) {
-                    for (int i = 0; i < 2; i++) {
-                        list.add(i, reportRS.getString(i + 1));
-                    }
-                }
-                tilePane.setPrefColumns(2);
-                tilePane.getChildren().add(subHeading("Volunteer"));
-                tilePane.getChildren().add(subHeading("Specialization"));
+                ResultSet reportRS = statement.executeQuery("select volunteerid, "
+                        + "specialization from volunteers order by volunteerid "
+                        + "desc");
+                String[] reportLabels = {"Volunteer","Specialization"};
+                reportBuilder2(2, reportRS, reportLabels);
                 pane.setTop(heading("Volunteer Specialization"));
             }
             if (selection == 4) {
-                list.clear();
                 ResultSet reportRS = statement.executeQuery("select firstname, "
                         + "lastname, phone, email from application inner join "
                         + "volunteers on application.applicationid = volunteers.applicationid");
-                while (reportRS.next()) {
-                    for (int i = 0; i < 4; i++) {
-                        list.add(i, reportRS.getString(i + 1));
-                    }
-                }
-                tilePane.setPrefColumns(4);
-                tilePane.getChildren().add(subHeading("First Name"));
-                tilePane.getChildren().add(subHeading("Last Name"));
-                tilePane.getChildren().add(subHeading("Phone Number"));
-                tilePane.getChildren().add(subHeading("Email"));
+                String[] reportLabels = {"First Name","Last Name","Phone Number","Email"};
+                reportBuilder2(4, reportRS, reportLabels);
                 pane.setTop(heading("Volunteer Contact Information"));
+            }
+            if (selection == 5) {
+                ResultSet reportRS = statement.executeQuery("select volunteerid, hours from volunteers");
+                String[] reportLabels = {"Volunteer ID","Total Hours"};
+                reportBuilder2(2, reportRS, reportLabels);
+                pane.setTop(heading("Volunteer Total Hours"));
+            }
+            if (selection == 6) {
+                ResultSet reportRS = statement.executeQuery("select * from animals");
+                String[] reportLabels = {"Animal ID","Name","Species","Breed","Age","Gender","Weight","Status"};
+                reportBuilder2(8, reportRS, reportLabels);
+                pane.setTop(heading("Animals"));
+            }
+            if (selection == 7) {
+                ResultSet reportRS = statement.executeQuery("select * from tasks");
+                String[] reportLabels = {"Task ID","Desc.","Location","Mileage","Max Volunteers"};
+                reportBuilder2(5, reportRS, reportLabels);
+                pane.setTop(heading("Tasks"));
             }
 
             refreshCenterPane(centerPane);
 
-            int records = list.size();
+            int records = reportList.size();
 
             for (int i = 0; i < records; i++) {
-                tilePane.getChildren().add(labelText(list.get(i)));
+                reportTilePane.getChildren().add(labelText(reportList.get(i)));
             }
 
-            centerPane.add(tilePane, 0, 0);
+            centerPane.add(reportTilePane, 0, 0);
             pane.setCenter(centerPane);
 
         } catch (SQLException e) {
         }
     }
+    
+    //Makes back-end for reports smaller
+    public void reportBuilder2(int columns, ResultSet rs, String[] labels) {
+        try {
+        reportList.clear();
+        reportTilePane.getChildren().clear();
+        while (rs.next()) {
+                    for (int i = 0; i < columns; i++) {
+                        reportList.add(i, rs.getString(i + 1));
+                    }
+                }
+        reportTilePane.setPrefColumns(columns);
+        for (int x = 0; x < columns; x++) {
+            reportTilePane.getChildren().add(subHeading(labels[x]));
+        }
+        } catch (SQLException e) {
+        }
+    }
+    
+    /*END: Sub-Section ~Reports~ */
 
+    //Method for application approval screen
     public void applicationApproval() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -1034,7 +1105,6 @@ public class capstoneRedo2 extends Application {
                         if (selectedDecision.equals("Approved")) { //if the application status is changed to approved
                             //Create new volunteer object
                             Volunteer newVolunteer = new Volunteer("Volunteer in Training", "None", 0.0, Integer.valueOf(id));
-                            // System.out.println(newVolunteer);
                             String sqlQuery = "insert into volunteers (volunteerid, title, specialization, hours, applicationid)"
                                     + " values (" + newVolunteer.volunteerID + ", '" + newVolunteer.title + "', '"
                                     + newVolunteer.specialization + "', " + newVolunteer.hours + ", " + newVolunteer.appID + ")";
@@ -1068,6 +1138,7 @@ public class capstoneRedo2 extends Application {
         pane.setCenter(centerPane);
     }
 
+    //Method for view animals screen
     public void viewAnimals() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -1202,6 +1273,7 @@ public class capstoneRedo2 extends Application {
         });
     }
 
+    //Method for add animals screen/functionality
     public void addAnimals() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -1298,6 +1370,7 @@ public class capstoneRedo2 extends Application {
         }
     }
 
+    //Method for updating animals 
     public void updateAnimal() throws SQLException {
         String connectionString = "jdbc:oracle:thin:@localhost:1521:XE";
         OracleDataSource ds = new OracleDataSource();   // use of OracleDriver is from this class
@@ -1385,57 +1458,13 @@ public class capstoneRedo2 extends Application {
             pane.setCenter(centerPane);
         }
     }
-
-    public VBox social() {
-        refreshCenterPane(centerPane);
-
-        VBox socialFeed = new VBox();
-
-        //adds buttons/textfields
-        ListView<String> chatbox = new ListView<String>();
-        TextArea newMessage = new TextArea();
-        Button post = new Button("Post");
-        post.setStyle(buttonStyle);
-
-        //sets textfild and button sizes
-        chatbox.setPrefWidth(500);
-        newMessage.setPrefWidth(500);
-
-        //Messages
-        ObservableList<String> messages
-                = FXCollections.observableArrayList(
-                        "Brad Pitt: Is Anyone heading to Lynchburg tomorrow?",
-                        "Paula Larry: Yes, do you need a ride?",
-                        "Brad Pitt: Yes, can you pick me up at 118 Street Road at 9:00?",
-                        "Paula Larry: Sounds good, see you then!",
-                        "Abby Turner: Does anyone need extra grooming supplies?"
-                );
-
-        socialFeed.getChildren().add(subHeading("BARK Social"));
-        socialFeed.getChildren().add(chatbox);
-        socialFeed.getChildren().add(labelText("Add to the conversation!"));
-        socialFeed.getChildren().add(newMessage);
-        socialFeed.getChildren().add(post);
-
-        chatbox.setItems(messages);
-
-        post.setOnAction(e -> {
-            String postString = (this.user + ": " + newMessage.getText());
-            chatbox.getItems().add(postString);
-            newMessage.clear();
-        });
-
-        addBackButton();
-       
-       socialFeed.setPrefWidth(80);
-       socialFeed.setAlignment(Pos.CENTER);
-       socialFeed.setPadding(new Insets(10.0));
-       socialFeed.setSpacing(10.0);
-
-        return socialFeed;
-    }
+    
+/*******END: Button Event Methods**********/
 
     public static void main(String[] args) {
         launch(args);
     }
 }
+
+/*******END: Program**********/
+
