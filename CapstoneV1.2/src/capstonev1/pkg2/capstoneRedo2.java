@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
@@ -618,6 +617,7 @@ public class capstoneRedo2 extends Application {
         String todaysDate = date.format(new Date());
         Label dateLbl = new Label(todaysDate);
         ComboBox<String> cboTasks = new ComboBox<>();
+       // ComboBox<String> cboAnimal = new ComboBox<>();
         Button clockin = new Button("Check in");
         clockin.setStyle(buttonStyle);
         Button clockout = new Button("Check Out");
@@ -629,6 +629,7 @@ public class capstoneRedo2 extends Application {
         centerPane.add(labelText("Current Time: "), 0, 2);
         centerPane.add(labelText("Available Tasks: "), 0, 3);
         centerPane.add(labelText("Animal Going: "), 0, 4);
+//        centerPane.add(labelText("Check-In Location: "), 0, 4);
 
         centerPane.add(dateLbl, 1, 1);
         centerPane.add(timeLbl, 1, 2);
@@ -656,6 +657,10 @@ public class capstoneRedo2 extends Application {
             String taskInfo = "Task ID: " + taskID + " \n" + des + "\nLocation: " + loc + ",\n" + mil + " Miles away";
             cboTasks.getItems().add(taskInfo);
 
+//        ResultSet rsLocation = statement.executeQuery("select distinct Location from Events");
+//        while (rsLocation.next()) {
+//            cboLocation.getItems().add(rsLocation.getString(1));
+//        }
             Shifts newShift = new Shifts();
             clockin.setOnAction(e -> {
                 String selectedTask = cboTasks.getSelectionModel().getSelectedItem();
@@ -670,13 +675,13 @@ public class capstoneRedo2 extends Application {
                 newShift.setTimeIn(timeNow);
                 newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setHours(" ");
                 newShift.setTaskID(Integer.valueOf(tID));
                 newShift.setAniamlID(Integer.valueOf(aID));
+//            Shifts newShift = new Shifts(
                 System.out.println(newShift);
-                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
+                String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" +newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -689,19 +694,15 @@ public class capstoneRedo2 extends Application {
             });
         }
         clockout.setOnAction(e -> {
-            DecimalFormat df = new DecimalFormat("0.00");
             String sqlQuery = "update shifts set timeout = '" + timeNow + "'"
                     + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-            String sqlSelect = "select timeIn from shifts " +
-                    "where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')"; 
             newShift.setTimeOut(timeNow);
             try {
                 statement.executeQuery(sqlQuery);
-                ResultSet rs = statement.executeQuery(sqlSelect);
-                while (rs.next()){
-                    String timeIn = rs.getString(1);
+                String timeIn = newShift.getTimeIn();
                 System.out.println(timeIn);
                 String timeOut = newShift.getTimeOut();
+                System.out.println(timeOut);
                 String[] timeInSArray = timeIn.split(":");
                 String[] timeOutSArray = timeOut.split(":");
                 double[] timeInArray = {Double.parseDouble(timeInSArray[0]),Double.parseDouble(timeInSArray[1])};
@@ -711,15 +712,9 @@ public class capstoneRedo2 extends Application {
                 double timeInHours = timeInArray[0] + timeInArray[1];
                 double timeOutHours = timeOutArray[0] + timeOutArray[1];
                 double totalHours = (timeOutArray[0] + timeOutArray[1]) - (timeInArray[0] + timeInArray[1]);
-                
-                System.out.println(totalHours);
                 //query to insert total hours into table... total hours column in table
-                String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
-                    + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
-                statement.executeQuery(query);
                 statement.executeQuery("commit");
-                }
-                } catch (SQLException ex) {
+            } catch (SQLException ex) {
             }
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setHeaderText("You are clocked out!");
