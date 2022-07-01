@@ -7,7 +7,8 @@ package capstonev1.pkg2;
  */
 public class Shifts {
     public int volID,taskID,animalID;
-    public String timein, timeout, shiftDate, totalHours;
+    public String timein, timeout, shiftDate;
+    public double totalHours;
     public static int count = 1;
     
     public Shifts(){
@@ -17,7 +18,7 @@ public class Shifts {
     count++;
     }
     
-    public Shifts(int vol, String in, String out, String date, String totalHours, int tID, int aID){
+    public Shifts(int vol, String in, String out, String date, double totalHours, int tID, int aID){
         this.volID = vol;
         this.timein = in;
         this.timeout = out;
@@ -46,7 +47,7 @@ public class Shifts {
     public int getAnimalID(){
         return animalID;
     }
-    public String getHours(){
+    public double getHours(){
         return totalHours;
     }
     
@@ -74,7 +75,7 @@ public class Shifts {
     public void setAniamlID(int a) {
         this.animalID = a;
     }
-    public void setHours(String h){
+    public void setHours(double h){
         this.totalHours = h;
     }
 }

@@ -629,13 +629,13 @@ public class capstoneRedo2 extends Application {
                 newShift.setTimeIn(timeNow);
                 newShift.setTimeOut(" ");
                 newShift.setDate(todaysDate);
-                newShift.setHours(" ");
+                newShift.setHours(0);
                 newShift.setTaskID(Integer.valueOf(tID));
                 newShift.setAniamlID(Integer.valueOf(aID));
                 System.out.println(newShift);
                 String sqlQuery = "insert into shifts (volunteerid, timein, timeout, shiftDate, totalhours, taskID, animalID)"
                         + " values (" + newShift.volID + ",'" + newShift.timein + "', '" + newShift.timeout
-                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), '" + newShift.totalHours + "', " + newShift.taskID + ", " + newShift.animalID + ")";
+                        + "', TO_DATE('" + newShift.shiftDate + "','yyyy/MM/dd'), " + newShift.totalHours + ", " + newShift.taskID + ", " + newShift.animalID + ")";
                 try {
                     statement.executeQuery(sqlQuery);
                     statement.executeQuery("commit");
@@ -673,7 +673,7 @@ public class capstoneRedo2 extends Application {
 
                     System.out.println(totalHours);
                     //query to insert total hours into table... total hours column in table
-                    String query = "update shifts set totalHours = '" + df.format(totalHours) + "'"
+                    String query = "update shifts set totalHours = " + df.format(totalHours)
                             + " where volunteerid = " + loggedInVolID + " and shiftdate = TO_DATE('" + todaysDate + "','yyyy/MM/dd')";
                     statement.executeQuery(query);
                     statement.executeQuery("commit");
